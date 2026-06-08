@@ -4,12 +4,21 @@ Theo dõi trạng thái các tool trong panel. Cập nhật cột **Status** khi
 
 **Legend:** ✅ Done · 🚧 In progress · 📋 Planned · 💡 Idea / chưa chốt
 
-## Đã có (baseline)
+## Đã có (baseline + shipped)
 
-| Tool           | Status | Mô tả                                                                |
-| -------------- | ------ | -------------------------------------------------------------------- |
-| Field Detector | ✅     | Bắt field thiếu trong `get_views` trước khi client crash.            |
-| noupdate       | ✅     | Đọc / toggle `ir.model.data.noupdate` theo XML ID hoặc model+res_id. |
+| Tool                 | Status | Mô tả                                                                              |
+| -------------------- | ------ | ---------------------------------------------------------------------------------- |
+| Field Detector       | ✅     | Bắt field thiếu trong `get_views`; toolbar filter/group + jump to arch/fields.     |
+| noupdate             | ✅     | Đọc / toggle `ir.model.data.noupdate` + browse list theo module/model + tree view. |
+| View arch inspector  | ✅     | Read `ir.ui.view.arch`, cross-check field refs vs `fields_get`, inline highlight.  |
+| Domain tester        | ✅     | search_count + preview với domain python-ish, KPI elapsed.                         |
+| ORM eval             | ✅     | Server action runner (state=code) với log/action capture, danger ack.              |
+| i18n gaps            | ✅     | Diff translatable char/text/html giữa en_US vs target lang.                        |
+| RPC Inspector        | ✅     | Capture fetch + XHR call_kw: timing, size, copy curl, filter status/method.        |
+| Model Browser        | ✅     | `ir.model` list + `fields_get` grouped by type, required/store/RO flags.           |
+| View Inspector       | ✅     | Picker mode click field trên page → name, widget, view type, model + jump.         |
+| Context viewer       | ✅     | uid/company/lang/tz/groups, switch company, debug/assets/cache actions.            |
+| Searchable lang/cmbo | ✅     | Generic `createCombo()` factory tái dùng (lang, company, action).                  |
 
 ---
 
@@ -17,22 +26,22 @@ Theo dõi trạng thái các tool trong panel. Cập nhật cột **Status** khi
 
 > Mục tiêu: biến panel thành "DevTools cho Odoo". Ưu tiên cao, ROI tốt.
 
-| #   | Feature           | Status | Ghi chú                                                                                        |
-| --- | ----------------- | ------ | ---------------------------------------------------------------------------------------------- |
-| 1   | RPC Inspector     | 📋     | Log mọi `call_kw`: model, method, args, thời gian (ms), size. Filter theo model, copy-as-curl. |
-| 2   | Model Browser     | 📋     | Nhập model → `fields_get`: name, type, required, relation. Bổ trợ Field Detector.              |
-| 3   | Quick search_read | 📋     | Ô domain + model → `search_read` nhanh, export JSON (tái dùng export sẵn).                     |
+| #   | Feature           | Status | Ghi chú                                                                                       |
+| --- | ----------------- | ------ | --------------------------------------------------------------------------------------------- |
+| 1   | RPC Inspector     | ✅     | `rpc` tab. Capture cả fetch + XHR. Ring buffer 500. Pause/clear/export/copy-curl.             |
+| 2   | Model Browser     | ✅     | `models` tab. Sidebar `ir.model` + per-field grouping + flags + search.                       |
+| 3   | Quick search_read | ✅     | Implemented as Domain tester (`domain` tab). KPI: count, elapsed, preview limit configurable. |
 
 ## Phase 2 — On-page inspector & năng suất
 
 > Cần tương tác với DOM của Odoo / nhiều RPC hơn.
 
-| #   | Feature               | Status | Ghi chú                                                                   |
-| --- | --------------------- | ------ | ------------------------------------------------------------------------- |
-| 4   | View Inspector        | 💡     | Click field trên màn hình → field name, type, model, widget, view XML ID. |
-| 5   | XML ID lookup mở rộng | 💡     | Reverse record → XML ID, nút "Open record" / "Open form view".            |
-| 6   | Context viewer        | 💡     | Hiện uid, company, lang, tz, groups; switch company nhanh.                |
-| 7   | Cache / assets reset  | 💡     | Nút regenerate assets — hay dùng khi dev.                                 |
+| #   | Feature               | Status | Ghi chú                                                                                              |
+| --- | --------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| 4   | View Inspector        | ✅     | `inspect` tab. Picker overlay (emerald), ESC cancels, capture name/widget/view/model/res_id + jumps. |
+| 5   | XML ID lookup mở rộng | ✅     | Reverse model+res_id → XML ID đã có trong noupdate tab; picker jump wires res_id.                    |
+| 6   | Context viewer        | ✅     | `ctx` tab. KPI strip + groups by category + company switcher (combo).                                |
+| 7   | Cache / assets reset  | ✅     | Folded vào context tab "dev tools": debug=1/assets/off, regen-assets, clear ir.qweb caches.          |
 
 ## Phase 3 — Mở rộng & polish
 
@@ -40,7 +49,7 @@ Theo dõi trạng thái các tool trong panel. Cập nhật cột **Status** khi
 
 | #   | Feature                             | Status | Ghi chú                                                                        |
 | --- | ----------------------------------- | ------ | ------------------------------------------------------------------------------ |
-| 8   | Field Detector: group/filter/search | 💡     | Nhóm theo model/view, search box, "Open offending view".                       |
+| 8   | Field Detector: group/filter/search | ✅     | Toolbar: filter q + cat seg + group (flat/model/view); per-row jump arch/flds. |
 | 9   | Settings tab                        | 💡     | Bật/tắt từng detector, whitelist field, chọn instance (thay sửa manifest tay). |
 | 10  | Persist state (`chrome.storage`)    | 💡     | Giữ problems + cấu hình khi reload tab.                                        |
 | 11  | Translation finder                  | 💡     | Bắt string chưa dịch trên view hiện tại.                                       |

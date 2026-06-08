@@ -3,6 +3,16 @@
 
   const RPC_MATCH = "call_kw";
   const EVENT = "__odoo_dev_toolkit__";
+  const CTX_EVENT = "__odoo_dev_toolkit_ctx__";
+  const RPC_EVENT = "__odoo_dev_toolkit_rpc__";
+  const TRACK_METHODS = new Set([
+    "web_search_read",
+    "web_read",
+    "read",
+    "read_group",
+    "web_read_group"
+  ]);
+  let rpcSeq = 0;
   const OPERATORS = new Set([
     "=",
     "!=",
@@ -166,6 +176,89 @@
     window.dispatchEvent(new CustomEvent(EVENT, { detail: { problems, url } }));
   }
 
+  function maybeEmitCtx(rawBody) {
+    if (typeof rawBody !== "string") return;
+    try {
+      const j = JSON.parse(rawBody);
+      const p = j && j.params;
+      if (!p || !p.model || !TRACK_METHODS.has(p.method)) return;
+      let resId = null;
+      const args = p.args;
+      if (Array.isArray(args) && args.length) {
+        const first = args[0];
+        if (typeof first === "number") resId = first;
+        else if (Array.isArray(first) && typeof first[0] === "number") resId = first[0];
+      }
+      window.dispatchEvent(new CustomEvent(CTX_EVENT, { detail: { model: p.model, resId } }));
+    } catch (e) {}
+  }
+
+  function parseCallKw(rawBody) {
+    if (typeof rawBody !== "string") return null;
+    try {
+      const j = JSON.parse(rawBody);
+      const p = j && j.params;
+      if (!p) return null;
+      return {
+        model: p.model || null,
+        method: p.method || null,
+        args: p.args || [],
+        kwargs: p.kwargs || {}
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function startRpc(rawBody, url) {
+    const meta = parseCallKw(rawBody);
+    if (!meta) return null;
+    const id = ++rpcSeq;
+    const entry = {
+      id,
+      t: Date.now(),
+      url,
+      model: meta.model,
+      method: meta.method,
+      args: meta.args,
+      kwargs: meta.kwargs,
+      reqSize: rawBody.length,
+      resSize: 0,
+      duration: 0,
+      status: "pending",
+      error: null,
+      result: undefined,
+      _start: performance.now()
+    };
+    window.dispatchEvent(new CustomEvent(RPC_EVENT, { detail: { kind: "start", entry } }));
+    return entry;
+  }
+
+  function finishRpc(entry, rawText, ok) {
+    if (!entry) return;
+    entry.duration = Math.max(0, performance.now() - entry._start);
+    entry.resSize = rawText ? rawText.length : 0;
+    delete entry._start;
+    let parsed = null;
+    if (rawText) {
+      try {
+        parsed = JSON.parse(rawText);
+      } catch (e) {}
+    }
+    if (parsed && parsed.error) {
+      entry.status = "error";
+      const e = parsed.error.data || {};
+      entry.error = e.message || parsed.error.message || "RPC error";
+    } else if (!ok) {
+      entry.status = "error";
+      entry.error = "HTTP error";
+    } else {
+      entry.status = "ok";
+      if (parsed) entry.result = parsed.result;
+    }
+    window.dispatchEvent(new CustomEvent(RPC_EVENT, { detail: { kind: "end", entry } }));
+  }
+
   function maybeCheck(rawText, url) {
     try {
       const data = JSON.parse(rawText);
@@ -175,19 +268,39 @@
 
   const origFetch = window.fetch;
   window.fetch = function (...args) {
-    return origFetch.apply(this, args).then((res) => {
-      try {
-        const url = typeof args[0] === "string" ? args[0] : (args[0] && args[0].url) || "";
-        if (url.includes(RPC_MATCH)) {
-          res
-            .clone()
-            .text()
-            .then((t) => maybeCheck(t, url))
-            .catch(() => {});
+    let entry = null;
+    let url = "";
+    try {
+      url = typeof args[0] === "string" ? args[0] : (args[0] && args[0].url) || "";
+      if (url.includes(RPC_MATCH)) {
+        const init = args[1];
+        if (init && typeof init.body === "string") {
+          maybeEmitCtx(init.body);
+          entry = startRpc(init.body, url);
         }
-      } catch (e) {}
-      return res;
-    });
+      }
+    } catch (e) {}
+    return origFetch.apply(this, args).then(
+      (res) => {
+        try {
+          if (url.includes(RPC_MATCH)) {
+            res
+              .clone()
+              .text()
+              .then((t) => {
+                maybeCheck(t, url);
+                finishRpc(entry, t, res.ok);
+              })
+              .catch(() => finishRpc(entry, "", res.ok));
+          }
+        } catch (e) {}
+        return res;
+      },
+      (err) => {
+        finishRpc(entry, "", false);
+        throw err;
+      }
+    );
   };
 
   const origOpen = XMLHttpRequest.prototype.open;
@@ -196,10 +309,19 @@
     this.__odt_url = url;
     return origOpen.apply(this, arguments);
   };
-  XMLHttpRequest.prototype.send = function () {
+  XMLHttpRequest.prototype.send = function (body) {
     if (this.__odt_url && String(this.__odt_url).includes(RPC_MATCH)) {
+      if (typeof body === "string") maybeEmitCtx(body);
+      const entry = typeof body === "string" ? startRpc(body, this.__odt_url) : null;
       this.addEventListener("load", function () {
         if (this.responseText) maybeCheck(this.responseText, this.__odt_url);
+        finishRpc(entry, this.responseText || "", this.status >= 200 && this.status < 400);
+      });
+      this.addEventListener("error", function () {
+        finishRpc(entry, "", false);
+      });
+      this.addEventListener("abort", function () {
+        finishRpc(entry, "", false);
       });
     }
     return origSend.apply(this, arguments);
