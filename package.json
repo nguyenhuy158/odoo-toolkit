@@ -1,0 +1,13 @@
+{
+  "name": "odoo-dev-toolkit",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Chrome extension toolkit for Odoo developers.",
+  "scripts": {
+    "build": "tailwindcss -c tailwind.config.js -i src/input.css -o toolkit.css --minify",
+    "watch": "tailwindcss -c tailwind.config.js -i src/input.css -o toolkit.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Odoo Dev Toolkit",
+  "version": "0.3.0",
+  "description": "A toolkit for Odoo developers: a view field detector and an ir.model.data noupdate toggle.",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["interceptor.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["ui.js"],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["toolkit.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
