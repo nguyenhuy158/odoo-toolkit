@@ -64,22 +64,22 @@ Theo dõi trạng thái các tool trong panel. Cập nhật cột **Status** khi
 
 | #   | Feature             | Status | Ghi chú                                                                                                     |
 | --- | ------------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| 12  | RPC Error catcher   | 💡     | Bắt mọi response có `error` (traceback Python) → hiển thị gọn, nút "Copy traceback", link tới model/method. |
-| 13  | Slow RPC profiler   | 💡     | Cảnh báo `call_kw` > ngưỡng (vd 500ms); bảng top-N method chậm nhất trong phiên. Mở rộng từ RPC Inspector.  |
-| 14  | N+1 / duplicate RPC | 💡     | Phát hiện cùng `(model, method, args)` gọi lặp nhiều lần liên tiếp — dấu hiệu vòng lặp ORM phía client.     |
+| 12  | RPC Error catcher   | ✅     | `analytics` tab → ERRORS view. Surface mọi response có `error`, traceback collapsible, copy, jump to RPC.   |
+| 13  | Slow RPC profiler   | ✅     | `analytics` tab → SLOW view. Top-N groups by `(method, model)` sort theo total, danh sách call > 500ms.     |
+| 14  | N+1 / duplicate RPC | ✅     | `analytics` tab → N+1 view. Cluster ≥3 calls cùng `(model, method, args)` trong 2s window, jump first call. |
 | 15  | Deprecation watcher | 💡     | Bắt warning trong response (`_deprecation`, attrs cũ) và API gọi method bị xoá ở version mới.               |
 
 ## Phase 5 — Data & record tools
 
 > Thao tác record nhanh khi dev/QA, đều qua `callKw` same-origin.
 
-| #   | Feature               | Status | Ghi chú                                                                                                       |
-| --- | --------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
-| 16  | Record inspector      | 💡     | Nhập model+id → `read` full field (kể cả field ẩn), hiện raw value, copy JSON. Bổ trợ noupdate/XML ID lookup. |
-| 17  | Field value editor    | 💡     | Sửa nhanh 1 field của record qua `write` (có confirm) — vá data lúc dev không cần mở form.                    |
-| 18  | Access rights checker | 💡     | `check_access_rights` + đọc `ir.model.access` / record rules áp lên model cho user hiện tại.                  |
-| 19  | Onchange tester       | 💡     | Gọi `onchange` với giá trị nhập tay → xem field nào đổi, debug logic onchange.                                |
-| 20  | Compute / recompute   | 💡     | Trigger `_compute`/`flush` qua method an toàn; hữu ích khi stored compute lệch.                               |
+| #   | Feature               | Status | Ghi chú                                                                                                 |
+| --- | --------------------- | ------ | ------------------------------------------------------------------------------------------------------- |
+| 16  | Record inspector      | ✅     | `record` tab. `fields_get` + `read([])` full fields, type/relation/flags, copy JSON, use active record. |
+| 17  | Field value editor    | 💡     | Sửa nhanh 1 field của record qua `write` (có confirm) — vá data lúc dev không cần mở form.              |
+| 18  | Access rights checker | 💡     | `check_access_rights` + đọc `ir.model.access` / record rules áp lên model cho user hiện tại.            |
+| 19  | Onchange tester       | ✅     | `record` tab → bottom section. Pick field + new value, call onchange, diff trước/sau + warning/domain.  |
+| 20  | Compute / recompute   | 💡     | Trigger `_compute`/`flush` qua method an toàn; hữu ích khi stored compute lệch.                         |
 
 ## Phase 6 — Frontend / view authoring
 
@@ -96,25 +96,25 @@ Theo dõi trạng thái các tool trong panel. Cập nhật cột **Status** khi
 
 > Tiện ích đời thường cho dev Odoo.
 
-| #   | Feature               | Status | Ghi chú                                                                                              |
-| --- | --------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| 25  | Debug mode toggle     | 💡     | Bật/tắt `?debug=1` / `?debug=assets` ngay trên panel, nhớ lựa chọn theo instance.                    |
-| 26  | Quick action launcher | 💡     | Gõ tên model → mở list/form; jump tới Settings > Technical nhanh (command palette kiểu Ctrl+K).      |
-| 27  | Session / env info    | 💡     | uid, login, company, lang, tz, db name, Odoo version, danh sách module cài (gộp với Context viewer). |
-| 28  | Menu / action XML ID  | 💡     | Hiện XML ID của menu/action đang mở để copy vào code.                                                |
-| 29  | Server actions runner | 💡     | Liệt kê & chạy `ir.actions.server` trên record hiện tại (có confirm).                                |
+| #   | Feature               | Status | Ghi chú                                                                                          |
+| --- | --------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| 25  | Debug mode toggle     | ✅     | Header pill ∅/1/A. URL toggle + localStorage per host, re-apply once per session if stored.      |
+| 26  | Quick action launcher | 🚧     | Cmd/Ctrl+K command palette mở (tab jumper). Model/menu jump chưa wire — chỉ tabs.                |
+| 27  | Session / env info    | ✅     | Context tab KPI strip mở rộng: db name + server version + installed module count.                |
+| 28  | Menu / action XML ID  | ✅     | Mouseover bất kỳ phần tử `data-menu-xmlid/menu-id/section-id/action-id` → floating badge + copy. |
+| 29  | Server actions runner | 💡     | Liệt kê & chạy `ir.actions.server` trên record hiện tại (có confirm).                            |
 
 ## Phase 8 — Quality of life
 
 > Polish panel & chia sẻ kết quả.
 
-| #   | Feature                | Status | Ghi chú                                                                      |
-| --- | ---------------------- | ------ | ---------------------------------------------------------------------------- |
-| 30  | Export / share report  | 💡     | Xuất toàn bộ findings (field + RPC error) ra JSON/Markdown để dán vào issue. |
-| 31  | Keyboard shortcuts     | 💡     | Mở/đóng panel, chuyển tab, focus search bằng phím tắt.                       |
-| 32  | Dark mode / theme      | 💡     | Theo `prefers-color-scheme`, đồng bộ với theme Odoo.                         |
-| 33  | Panel layout           | 💡     | Kéo-thả vị trí, resize, dock trái/phải, nhớ vị trí qua `chrome.storage`.     |
-| 34  | Multi-instance presets | 💡     | Lưu cấu hình riêng theo host (prod cảnh báo đỏ, dev/staging màu khác).       |
+| #   | Feature                | Status | Ghi chú                                                                            |
+| --- | ---------------------- | ------ | ---------------------------------------------------------------------------------- |
+| 30  | Export / share report  | 💡     | Xuất toàn bộ findings (field + RPC error) ra JSON/Markdown để dán vào issue.       |
+| 31  | Keyboard shortcuts     | ✅     | Cmd/Ctrl+Shift+D toggle panel · Cmd/Ctrl+Shift+< cycle debug · Cmd/Ctrl+K palette. |
+| 32  | Dark mode / theme      | 💡     | Theo `prefers-color-scheme`, đồng bộ với theme Odoo.                               |
+| 33  | Panel layout           | 💡     | Kéo-thả vị trí, resize, dock trái/phải, nhớ vị trí qua `chrome.storage`.           |
+| 34  | Multi-instance presets | 💡     | Lưu cấu hình riêng theo host (prod cảnh báo đỏ, dev/staging màu khác).             |
 
 ---
 

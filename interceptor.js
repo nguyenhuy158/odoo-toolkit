@@ -249,6 +249,8 @@
       entry.status = "error";
       const e = parsed.error.data || {};
       entry.error = e.message || parsed.error.message || "RPC error";
+      entry.traceback = e.debug || null;
+      entry.errorName = e.name || (parsed.error && parsed.error.message) || null;
     } else if (!ok) {
       entry.status = "error";
       entry.error = "HTTP error";

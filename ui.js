@@ -50,6 +50,22 @@
     return data.result;
   }
 
+  let SESSION_INFO_CACHE = null;
+  async function fetchSessionInfo() {
+    if (SESSION_INFO_CACHE) return SESSION_INFO_CACHE;
+    const res = await fetch("/web/session/get_session_info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ jsonrpc: "2.0", method: "call", params: {} })
+    });
+    const data = await res.json();
+    if (data.error)
+      throw new Error((data.error.data && data.error.data.message) || "session error");
+    SESSION_INFO_CACHE = data.result || null;
+    return SESSION_INFO_CACHE;
+  }
+
   function build() {
     const host = document.createElement("div");
     host.id = "__odoo_dev_toolkit_host__";
@@ -811,6 +827,159 @@
         background: rgba(15,23,42,0.5);
         border-top: 1px dashed rgba(148,163,184,0.18);
       }
+      .odt-dbg-seg {
+        display: inline-flex; gap: 0; align-items: stretch;
+        border-radius: 4px; overflow: hidden;
+        border: 1px solid rgba(100,116,139,0.4);
+      }
+      .odt-dbg-seg button {
+        all: unset; cursor: pointer;
+        font: 700 10px/1 "JetBrains Mono",ui-monospace,monospace;
+        padding: 4px 7px; color: #94a3b8;
+        background: rgba(15,23,42,0.6);
+        text-align: center; min-width: 16px;
+      }
+      .odt-dbg-seg button + button { border-left: 1px solid rgba(100,116,139,0.3); }
+      .odt-dbg-seg button:hover { background: rgba(30,41,59,0.9); color: #e2e8f0; }
+      .odt-dbg-seg button.active { color: #0f172a; background: #fbbf24; }
+      .odt-dbg-seg button.active[data-dbg="1"] { background: #34d399; }
+      .odt-dbg-seg button.active[data-dbg=""] { background: #64748b; color: #f1f5f9; }
+      .odt-pal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(2,6,23,0.55);
+        z-index: 2147483647; display: flex; align-items: flex-start; justify-content: center;
+        padding-top: 14vh;
+      }
+      .odt-pal-box {
+        width: 480px; max-width: 92vw;
+        background: #0f172a; color: #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(52,211,153,0.4);
+        overflow: hidden;
+        font: 13px/1.4 "JetBrains Mono",ui-monospace,monospace;
+      }
+      .odt-pal-input {
+        all: unset; display: block; width: 100%;
+        box-sizing: border-box;
+        padding: 14px 16px;
+        font: 14px/1 "JetBrains Mono",ui-monospace,monospace;
+        color: #f1f5f9;
+        border-bottom: 1px solid rgba(100,116,139,0.3);
+      }
+      .odt-pal-input::placeholder { color: #475569; }
+      .odt-pal-list { max-height: 50vh; overflow-y: auto; padding: 6px 0; }
+      .odt-pal-item {
+        padding: 8px 16px; cursor: pointer;
+        display: flex; gap: 10px; align-items: center;
+        color: #cbd5e1;
+      }
+      .odt-pal-item.active { background: rgba(52,211,153,0.18); color: #fff; }
+      .odt-pal-item .kbd {
+        font-size: 10px; color: #64748b; margin-left: auto;
+        padding: 1px 5px; border: 1px solid rgba(100,116,139,0.4); border-radius: 3px;
+      }
+      .odt-menu-badge {
+        position: fixed; z-index: 2147483646;
+        display: flex; gap: 6px; align-items: center;
+        padding: 6px 10px;
+        background: #0f172a; color: #e2e8f0;
+        border-radius: 6px;
+        font: 11px/1.2 "JetBrains Mono",ui-monospace,monospace;
+        box-shadow: 0 12px 28px -10px rgba(0,0,0,0.7), 0 0 0 1px rgba(52,211,153,0.45);
+        pointer-events: auto; user-select: text;
+      }
+      .odt-menu-badge .lbl { color: #64748b; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
+      .odt-menu-badge .xid { color: #6ee7b7; }
+      .odt-menu-badge button {
+        all: unset; cursor: pointer; color: #94a3b8;
+        padding: 2px 6px; border-radius: 3px;
+        font-size: 10px;
+      }
+      .odt-menu-badge button:hover { color: #fbbf24; background: rgba(251,191,36,0.1); }
+      .odt-an-err {
+        margin-bottom: 8px; padding: 8px 10px;
+        background: rgba(244,63,94,0.07);
+        border-left: 2px solid #f43f5e;
+        border-radius: 0 4px 4px 0;
+      }
+      .odt-an-err .head { display: flex; gap: 8px; align-items: baseline; }
+      .odt-an-err .head .spacer { flex: 1; }
+      .odt-an-err .head .t { color: #64748b; font-size: 10px; }
+      .odt-an-err .head .meth { color: #7dd3fc; font-weight: 700; }
+      .odt-an-err .head .model { color: #fbbf24; }
+      .odt-an-err .head .dur { color: #64748b; font-size: 10px; }
+      .odt-an-err .head .lnk {
+        all: unset; cursor: pointer; color: #94a3b8; font-size: 10px;
+        padding: 1px 5px; border-radius: 3px;
+      }
+      .odt-an-err .head .lnk:hover { color: #6ee7b7; background: rgba(52,211,153,0.1); }
+      .odt-an-err .msg { color: #fda4af; margin: 4px 0; word-break: break-word; }
+      .odt-an-err details {
+        margin-top: 4px; font-size: 10.5px;
+        background: rgba(15,23,42,0.4); border-radius: 4px;
+        padding: 0 8px;
+      }
+      .odt-an-err details summary {
+        cursor: pointer; color: #94a3b8; padding: 4px 0;
+        list-style: none; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+      }
+      .odt-an-err details summary::-webkit-details-marker { display: none; }
+      .odt-an-err details pre {
+        color: #cbd5e1; padding: 0 0 8px;
+        white-space: pre-wrap; word-break: break-word; font-size: 10px; line-height: 1.4;
+      }
+      .odt-an-table { display: grid; gap: 0; }
+      .odt-an-table .row {
+        display: grid; grid-template-columns: 1fr 50px 70px 70px 70px;
+        gap: 8px; padding: 4px 8px; align-items: center;
+        border-bottom: 1px dashed rgba(100,116,139,0.15);
+      }
+      .odt-an-table .row.head {
+        color: #f59e0b; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+        border-bottom-color: rgba(245,158,11,0.3); padding-top: 6px; padding-bottom: 6px;
+      }
+      .odt-an-table .row .m { color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .odt-an-table .row.slow .m { color: #fbbf24; }
+      .odt-an-table .row.veryslow .m { color: #fda4af; }
+      .odt-an-sub {
+        margin-top: 14px; color: #f59e0b;
+        font: 700 9px/1 "JetBrains Mono",ui-monospace,monospace;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        padding-bottom: 4px; border-bottom: 1px dashed rgba(245,158,11,0.3);
+      }
+      .odt-an-slow {
+        display: grid; grid-template-columns: 80px 1fr 1fr 70px 30px;
+        gap: 8px; padding: 3px 0; align-items: center;
+        border-bottom: 1px dashed rgba(100,116,139,0.1);
+      }
+      .odt-an-slow .t { color: #64748b; font-size: 10px; }
+      .odt-an-slow .meth { color: #7dd3fc; }
+      .odt-an-slow .model { color: #fbbf24; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .odt-an-slow .dur { text-align: right; }
+      .odt-an-slow .dur.slow { color: #fbbf24; }
+      .odt-an-slow .dur.veryslow { color: #fda4af; }
+      .odt-an-slow button {
+        all: unset; cursor: pointer; color: #94a3b8;
+        text-align: center; padding: 0 4px; border-radius: 3px;
+      }
+      .odt-an-slow button:hover { color: #6ee7b7; background: rgba(52,211,153,0.1); }
+      .odt-an-n1 {
+        margin-bottom: 6px; padding: 6px 10px;
+        background: rgba(167,139,250,0.07);
+        border-left: 2px solid #a78bfa;
+        border-radius: 0 4px 4px 0;
+      }
+      .odt-an-n1 .head { display: flex; gap: 8px; align-items: baseline; }
+      .odt-an-n1 .head .spacer { flex: 1; }
+      .odt-an-n1 .head .meth { color: #7dd3fc; font-weight: 700; }
+      .odt-an-n1 .head .model { color: #fbbf24; }
+      .odt-an-n1 .head .dur { color: #c4b5fd; font-weight: 700; }
+      .odt-an-n1 .head .lnk {
+        all: unset; cursor: pointer; color: #94a3b8; font-size: 10px;
+        padding: 1px 5px; border-radius: 3px;
+      }
+      .odt-an-n1 .head .lnk:hover { color: #6ee7b7; background: rgba(52,211,153,0.1); }
+      .odt-an-n1 .msg { color: #94a3b8; font-size: 10px; margin-top: 2px; word-break: break-all; }
     `;
     shadow.appendChild(style);
 
@@ -837,6 +1006,11 @@
             <span class="text-[11px] text-slate-400">developer utilities</span>
           </div>
           <div class="flex items-center gap-1">
+            <div id="odt-dbg-seg" class="odt-dbg-seg odt-mono" title="debug mode (Cmd/Ctrl+Shift+,)">
+              <button data-dbg="" title="debug off">∅</button>
+              <button data-dbg="1" title="?debug=1">1</button>
+              <button data-dbg="assets" title="?debug=assets">A</button>
+            </div>
             <button id="odt-max" title="maximize"
               class="rounded-md px-2 py-1 text-[11px] font-medium bg-slate-700 text-slate-200 hover:bg-slate-600 cursor-pointer">▢</button>
             <button id="odt-min" title="minimize"
@@ -865,6 +1039,10 @@
             class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">inspect</button>
           <button data-tab="ctx"
             class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">context</button>
+          <button data-tab="analytics"
+            class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">analytics</button>
+          <button data-tab="record"
+            class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">record</button>
         </div>
 
         <div id="odt-tab-detector" class="flex-1 overflow-auto flex flex-col min-h-0">
@@ -1137,6 +1315,63 @@ for p in partners:
           </div>
         </div>
 
+        <div id="odt-tab-analytics" class="hidden flex-1 flex flex-col min-h-0">
+          <div class="odt-rpc-toolbar odt-mono">
+            <div class="odt-seg" id="odt-an-view-seg">
+              <button data-view="errors" class="active">ERRORS</button>
+              <button data-view="slow">SLOW</button>
+              <button data-view="nplus1">N+1</button>
+            </div>
+            <span class="spacer"></span>
+            <span class="stat"><span class="n" id="odt-an-count">0</span></span>
+            <button id="odt-an-refresh" class="odt-mini-btn">▶ refresh</button>
+            <button id="odt-an-clear" class="odt-mini-btn">▶ clear log</button>
+          </div>
+          <div id="odt-an-body" class="flex-1 overflow-auto px-3 py-2 odt-mono text-xs">
+            <div class="text-slate-500 text-center py-6">// no data — interact with Odoo first</div>
+          </div>
+        </div>
+
+        <div id="odt-tab-record" class="hidden flex-1 overflow-auto">
+          <div class="odt-pane odt-mono">
+            <h4>▌ record inspector</h4>
+            <div class="odt-row-input">
+              <label class="odt-field"><span>model</span>
+                <input id="odt-rec-model" class="odt-input" type="text" placeholder="res.partner"/>
+              </label>
+              <label class="odt-field"><span>id</span>
+                <input id="odt-rec-id" class="odt-input" type="number" placeholder="1"/>
+              </label>
+              <button id="odt-rec-load" class="odt-btn-exec">Load</button>
+            </div>
+            <div class="odt-page-bar">
+              <span id="odt-rec-page-hint"><span class="muted">// no active record detected</span></span>
+              <span class="spacer"></span>
+              <button id="odt-rec-page-use" class="odt-mini-btn">▶ use active</button>
+            </div>
+            <div id="odt-rec-out" class="odt-output muted" style="max-height:300px;overflow:auto">// enter model + id</div>
+            <div class="odt-row-input" style="margin-top:6px">
+              <span></span>
+              <button id="odt-rec-copy" class="odt-mini-btn" disabled>▶ copy JSON</button>
+            </div>
+
+            <div class="odt-section" style="margin-top:18px">
+              <span class="odt-section-label">▌ onchange tester</span>
+              <p class="hint">Pick a field to mutate. Calls <code>onchange</code> with current record + new value, shows the diff Odoo would apply.</p>
+              <div class="odt-row-input">
+                <label class="odt-field"><span>field</span>
+                  <div id="odt-oc-field-combo" class="odt-combo" data-open="false" style="min-width:160px"></div>
+                </label>
+                <label class="odt-field"><span>new value</span>
+                  <input id="odt-oc-value" class="odt-input" type="text" placeholder="JSON literal or string"/>
+                </label>
+                <button id="odt-oc-run" class="odt-btn-exec" disabled>Run</button>
+              </div>
+              <div id="odt-oc-out" class="odt-output muted" style="max-height:240px;overflow:auto">// load a record first</div>
+            </div>
+          </div>
+        </div>
+
         <div id="odt-tab-models" class="hidden flex-1 flex min-h-0">
           <div class="odt-mb-grid flex-1 min-h-0">
             <div class="odt-mb-sidebar">
@@ -1343,6 +1578,12 @@ for p in partners:
     shadow.getElementById("odt-pk-toggle").addEventListener("click", togglePicker);
     shadow.getElementById("odt-ctx-refresh").addEventListener("click", loadCtx);
     initCtxActionCombo();
+
+    initDebugPill();
+    initShortcuts();
+    initMenuBadge();
+    initAnalyticsTab();
+    initRecordTab();
 
     updatePageHint();
   }
@@ -1597,9 +1838,13 @@ for p in partners:
     shadow.getElementById("odt-tab-models").classList.toggle("hidden", tab !== "models");
     shadow.getElementById("odt-tab-inspect").classList.toggle("hidden", tab !== "inspect");
     shadow.getElementById("odt-tab-ctx").classList.toggle("hidden", tab !== "ctx");
+    shadow.getElementById("odt-tab-analytics").classList.toggle("hidden", tab !== "analytics");
+    shadow.getElementById("odt-tab-record").classList.toggle("hidden", tab !== "record");
     if (tab === "rpc") shadow.getElementById("odt-rpc-dot").classList.add("hidden");
     if (tab === "models" && !mbModelsLoaded) loadModelBrowser();
     if (tab === "ctx" && !ctxLoaded) loadCtx();
+    if (tab === "analytics") renderAnalytics();
+    if (tab === "record") updateRecordHint();
   }
 
   let mbModelsLoaded = false;
@@ -2353,6 +2598,7 @@ for p in partners:
     renderHint("odt-dt-page-hint", false);
     renderHint("odt-i18n-page-hint", false);
     renderHint("odt-mb-page-hint", false);
+    renderHint("odt-rec-page-hint", true);
     const vaHint = shadow.getElementById("odt-va-page-hint");
     if (vaHint) {
       if (problems.length) {
@@ -3048,6 +3294,7 @@ except NameError:
         <span class="spacer"></span>
         <button class="lnk" data-act="copy-args">copy args</button>
         <button class="lnk" data-act="copy-curl">copy curl</button>
+        <button class="lnk" data-act="copy-py">copy py</button>
       </div>
       ${r.error ? `<div class="odt-err" style="margin-bottom:8px">// ${escapeHtml(r.error)}</div>` : ""}
       <div class="sec-label">args</div>
@@ -3060,6 +3307,9 @@ except NameError:
     el.querySelector('[data-act="copy-curl"]').addEventListener("click", () =>
       copyText(buildCurl(r))
     );
+    el.querySelector('[data-act="copy-py"]').addEventListener("click", () =>
+      copyText(buildPython(r))
+    );
   }
 
   function buildCurl(r) {
@@ -3070,6 +3320,33 @@ except NameError:
     });
     const url = location.origin + (r.url.startsWith("/") ? r.url : "/" + r.url);
     return `curl '${url}' \\\n  -H 'Content-Type: application/json' \\\n  --cookie 'session_id=<YOUR_SESSION_ID>' \\\n  --data-raw '${body.replace(/'/g, "'\\''")}'`;
+  }
+
+  function pyRepr(v) {
+    if (v === null || v === undefined) return "None";
+    if (v === true) return "True";
+    if (v === false) return "False";
+    if (typeof v === "number") return Number.isFinite(v) ? String(v) : "None";
+    if (typeof v === "string") {
+      return "'" + v.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'";
+    }
+    if (Array.isArray(v)) return "[" + v.map(pyRepr).join(", ") + "]";
+    if (typeof v === "object") {
+      const parts = Object.entries(v).map(([k, val]) => `${pyRepr(k)}: ${pyRepr(val)}`);
+      return "{" + parts.join(", ") + "}";
+    }
+    return "None";
+  }
+
+  function buildPython(r) {
+    const model = r.model || "model.name";
+    const method = r.method || "method";
+    const args = Array.isArray(r.args) ? r.args : [];
+    const kwargs = r.kwargs && typeof r.kwargs === "object" ? r.kwargs : {};
+    const argList = args.map(pyRepr);
+    const kwList = Object.entries(kwargs).map(([k, v]) => `${k}=${pyRepr(v)}`);
+    const allArgs = argList.concat(kwList).join(", ");
+    return `env['${model}'].${method}(${allArgs})`;
   }
 
   function copyText(text) {
@@ -3512,9 +3789,21 @@ except NameError:
               ["id", "name", "category_id", "full_name"]
             ])
           : [];
+      const session = await fetchSessionInfo().catch(() => null);
+      const moduleCount = await callKw("ir.module.module", "search_count", [
+        [["state", "=", "installed"]]
+      ]).catch(() => null);
+      const dbName = (session && session.db) || "?";
+      const verInfo =
+        (session &&
+          (session.server_version || (session.version_info && session.version_info.join(".")))) ||
+        "?";
 
       grid.style.display = "flex";
       grid.innerHTML = `
+        <div class="cell"><span class="k">db</span><span class="v" style="font-size:11px;color:#fbbf24">${escapeHtml(dbName)}</span></div>
+        <div class="cell"><span class="k">version</span><span class="v" style="font-size:11px">${escapeHtml(String(verInfo))}</span></div>
+        <div class="cell"><span class="k">modules</span><span class="v">${moduleCount === null ? "?" : moduleCount}</span></div>
         <div class="cell"><span class="k">uid</span><span class="v">${u.id}</span></div>
         <div class="cell"><span class="k">login</span><span class="v" style="font-size:11px">${escapeHtml(u.login)}</span></div>
         <div class="cell"><span class="k">name</span><span class="v" style="font-size:11px">${escapeHtml(u.name)}</span></div>
@@ -3676,6 +3965,749 @@ except NameError:
         <span class="rel">${rel}</span>
         <span class="flags">${flags.join(" ")}</span>
       </div>`;
+  }
+
+  function dbgStorageKey() {
+    return `odt:debug:${location.host}`;
+  }
+
+  function currentDebug() {
+    const v = new URL(location.href).searchParams.get("debug");
+    if (v === null) return "";
+    if (v === "" || v === "1" || v === "assets") return v;
+    return "1";
+  }
+
+  function setDebugMode(val) {
+    try {
+      localStorage.setItem(dbgStorageKey(), val);
+    } catch (e) {}
+    setDebug(val);
+  }
+
+  function paintDebugPill() {
+    const cur = currentDebug();
+    shadow.querySelectorAll("#odt-dbg-seg button").forEach((b) => {
+      b.classList.toggle("active", b.dataset.dbg === cur);
+    });
+  }
+
+  function initDebugPill() {
+    const seg = shadow.getElementById("odt-dbg-seg");
+    if (!seg) return;
+    paintDebugPill();
+    seg.querySelectorAll("button").forEach((b) => {
+      b.addEventListener("click", () => setDebugMode(b.dataset.dbg));
+    });
+    try {
+      const stored = localStorage.getItem(dbgStorageKey());
+      const cur = currentDebug();
+      if (stored && stored !== cur && !sessionStorage.getItem("odt:debug:autoSkip")) {
+        sessionStorage.setItem("odt:debug:autoSkip", "1");
+        if (stored === "" && cur !== "") return;
+        if (stored !== "" && cur === "") setDebug(stored);
+      }
+    } catch (e) {}
+  }
+
+  const TAB_LABELS = {
+    detector: "Field Detector",
+    noupdate: "noupdate",
+    viewarch: "View Arch",
+    domain: "Domain Tester",
+    ormeval: "ORM Eval",
+    i18n: "i18n Gaps",
+    rpc: "RPC Inspector",
+    models: "Model Browser",
+    inspect: "On-page Inspector",
+    ctx: "Context"
+  };
+
+  function initShortcuts() {
+    document.addEventListener("keydown", onShortcut, true);
+    shadow.addEventListener("keydown", onShortcut, true);
+  }
+
+  function onShortcut(e) {
+    const mod = e.metaKey || e.ctrlKey;
+    if (!mod) return;
+    if (e.shiftKey && (e.key === "D" || e.key === "d")) {
+      e.preventDefault();
+      togglePanelKeyboard();
+    } else if (e.shiftKey && e.key === "<") {
+      e.preventDefault();
+      cycleDebug();
+    } else if (!e.shiftKey && !e.altKey && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      openPalette();
+    }
+  }
+
+  function togglePanelKeyboard() {
+    const hidden = panel.classList.contains("hidden");
+    toggle(hidden);
+  }
+
+  function cycleDebug() {
+    const order = ["", "1", "assets"];
+    const cur = currentDebug();
+    const idx = order.indexOf(cur);
+    setDebugMode(order[(idx + 1) % order.length]);
+  }
+
+  let palOverlay = null;
+  function openPalette() {
+    if (palOverlay) return;
+    palOverlay = document.createElement("div");
+    palOverlay.className = "odt-pal-overlay";
+    palOverlay.innerHTML = `
+      <div class="odt-pal-box" role="dialog">
+        <input class="odt-pal-input" type="text" placeholder="Jump to tab…" />
+        <div class="odt-pal-list"></div>
+      </div>`;
+    shadow.appendChild(palOverlay);
+    const input = palOverlay.querySelector(".odt-pal-input");
+    const list = palOverlay.querySelector(".odt-pal-list");
+    let items = [];
+    let active = 0;
+    const allItems = Object.entries(TAB_LABELS).map(([k, label]) => ({ key: k, label }));
+
+    function render() {
+      const q = input.value.trim().toLowerCase();
+      items = q
+        ? allItems.filter((i) => i.label.toLowerCase().includes(q) || i.key.includes(q))
+        : allItems;
+      if (active >= items.length) active = 0;
+      list.innerHTML = items
+        .map(
+          (it, i) =>
+            `<div class="odt-pal-item ${i === active ? "active" : ""}" data-key="${escapeHtml(it.key)}">
+              <span>${escapeHtml(it.label)}</span>
+              <span class="kbd">${escapeHtml(it.key)}</span>
+            </div>`
+        )
+        .join("");
+      list.querySelectorAll(".odt-pal-item").forEach((el, i) => {
+        el.addEventListener("mousemove", () => {
+          if (active !== i) {
+            active = i;
+            paint();
+          }
+        });
+        el.addEventListener("click", () => pick(items[i]));
+      });
+    }
+    function paint() {
+      list.querySelectorAll(".odt-pal-item").forEach((el, i) => {
+        el.classList.toggle("active", i === active);
+      });
+    }
+    function pick(it) {
+      if (!it) return;
+      toggle(true);
+      switchTab(it.key);
+      closePalette();
+    }
+    input.addEventListener("input", render);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closePalette();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        active = Math.min(items.length - 1, active + 1);
+        paint();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        active = Math.max(0, active - 1);
+        paint();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        pick(items[active]);
+      }
+    });
+    palOverlay.addEventListener("click", (e) => {
+      if (e.target === palOverlay) closePalette();
+    });
+    render();
+    input.focus();
+  }
+
+  function closePalette() {
+    if (palOverlay) {
+      palOverlay.remove();
+      palOverlay = null;
+    }
+  }
+
+  const MENU_XMLID_CACHE = new Map();
+  const ACT_XMLID_CACHE = new Map();
+  let menuBadgeEl = null;
+  let menuBadgeHideTimer = null;
+
+  function initMenuBadge() {
+    document.addEventListener(
+      "mouseover",
+      (e) => {
+        const t = e.target;
+        if (!t || t.nodeType !== 1) return;
+        if (menuBadgeEl && menuBadgeEl.contains(t)) return;
+        const info = resolveMenuTarget(t);
+        if (info) showMenuBadge(info, t);
+      },
+      true
+    );
+    document.addEventListener(
+      "mouseout",
+      (e) => {
+        if (menuBadgeEl && e.relatedTarget && menuBadgeEl.contains(e.relatedTarget)) return;
+        scheduleHideBadge();
+      },
+      true
+    );
+  }
+
+  function resolveMenuTarget(node) {
+    const menuEl = node.closest && node.closest("[data-menu-xmlid]");
+    if (menuEl) return { kind: "menu", xmlid: menuEl.getAttribute("data-menu-xmlid") };
+    const menuById = node.closest && node.closest("[data-menu-id]");
+    if (menuById)
+      return { kind: "menu-id", id: parseInt(menuById.getAttribute("data-menu-id"), 10) };
+    const navById = node.closest && node.closest("[data-section-id]");
+    if (navById)
+      return { kind: "menu-id", id: parseInt(navById.getAttribute("data-section-id"), 10) };
+    const actEl = node.closest && node.closest("[data-action-id]");
+    if (actEl) {
+      const id = parseInt(actEl.getAttribute("data-action-id"), 10);
+      if (!Number.isNaN(id)) return { kind: "action-id", id };
+    }
+    return null;
+  }
+
+  async function resolveXmlId(info) {
+    if (info.kind === "menu" && info.xmlid) return info.xmlid;
+    if (info.kind === "menu-id") {
+      if (MENU_XMLID_CACHE.has(info.id)) return MENU_XMLID_CACHE.get(info.id);
+      const rows = await callKw(
+        "ir.model.data",
+        "search_read",
+        [
+          [
+            ["model", "=", "ir.ui.menu"],
+            ["res_id", "=", info.id]
+          ],
+          ["module", "name"]
+        ],
+        { limit: 1 }
+      ).catch(() => []);
+      const xid = rows && rows[0] ? `${rows[0].module}.${rows[0].name}` : null;
+      MENU_XMLID_CACHE.set(info.id, xid);
+      return xid;
+    }
+    if (info.kind === "action-id") {
+      if (ACT_XMLID_CACHE.has(info.id)) return ACT_XMLID_CACHE.get(info.id);
+      const rows = await callKw(
+        "ir.model.data",
+        "search_read",
+        [
+          [
+            [
+              "model",
+              "in",
+              [
+                "ir.actions.act_window",
+                "ir.actions.server",
+                "ir.actions.client",
+                "ir.actions.report"
+              ]
+            ],
+            ["res_id", "=", info.id]
+          ],
+          ["module", "name"]
+        ],
+        { limit: 1 }
+      ).catch(() => []);
+      const xid = rows && rows[0] ? `${rows[0].module}.${rows[0].name}` : null;
+      ACT_XMLID_CACHE.set(info.id, xid);
+      return xid;
+    }
+    return null;
+  }
+
+  async function showMenuBadge(info, anchor) {
+    if (menuBadgeHideTimer) {
+      clearTimeout(menuBadgeHideTimer);
+      menuBadgeHideTimer = null;
+    }
+    let xid;
+    try {
+      xid = await resolveXmlId(info);
+    } catch (e) {
+      return;
+    }
+    if (!xid) return;
+    if (!menuBadgeEl) {
+      menuBadgeEl = document.createElement("div");
+      menuBadgeEl.className = "odt-menu-badge";
+      const inner = document.createElement("div");
+      inner.style.cssText = "display:flex;gap:6px;align-items:center";
+      menuBadgeEl.appendChild(inner);
+      document.documentElement.appendChild(menuBadgeEl);
+      menuBadgeEl.addEventListener("mouseenter", () => {
+        if (menuBadgeHideTimer) {
+          clearTimeout(menuBadgeHideTimer);
+          menuBadgeHideTimer = null;
+        }
+      });
+      menuBadgeEl.addEventListener("mouseleave", scheduleHideBadge);
+    }
+    const label = info.kind === "action-id" ? "ACTION" : "MENU";
+    menuBadgeEl.firstChild.innerHTML = `
+      <span class="lbl">${label}</span>
+      <span class="xid"></span>
+      <button data-act="copy">copy</button>`;
+    menuBadgeEl.querySelector(".xid").textContent = xid;
+    menuBadgeEl.querySelector('[data-act="copy"]').onclick = () => copyText(xid);
+    const r = anchor.getBoundingClientRect();
+    menuBadgeEl.style.top = `${Math.max(8, r.bottom + 4)}px`;
+    menuBadgeEl.style.left = `${Math.max(8, Math.min(window.innerWidth - 320, r.left))}px`;
+    menuBadgeEl.style.display = "flex";
+  }
+
+  function scheduleHideBadge() {
+    if (menuBadgeHideTimer) clearTimeout(menuBadgeHideTimer);
+    menuBadgeHideTimer = setTimeout(() => {
+      if (menuBadgeEl) menuBadgeEl.style.display = "none";
+    }, 400);
+  }
+
+  let analyticsView = "errors";
+  function initAnalyticsTab() {
+    const seg = shadow.getElementById("odt-an-view-seg");
+    seg.querySelectorAll("button").forEach((b) => {
+      b.addEventListener("click", () => {
+        analyticsView = b.dataset.view;
+        seg
+          .querySelectorAll("button")
+          .forEach((x) => x.classList.toggle("active", x.dataset.view === analyticsView));
+        renderAnalytics();
+      });
+    });
+    shadow.getElementById("odt-an-refresh").addEventListener("click", renderAnalytics);
+    shadow.getElementById("odt-an-clear").addEventListener("click", () => {
+      clearRpc();
+      renderAnalytics();
+    });
+  }
+
+  function renderAnalytics() {
+    const body = shadow.getElementById("odt-an-body");
+    const countEl = shadow.getElementById("odt-an-count");
+    if (!body) return;
+    if (!rpcLog.length) {
+      countEl.textContent = "0";
+      body.innerHTML = `<div class="text-slate-500 text-center py-6">// no RPC data — interact with Odoo first</div>`;
+      return;
+    }
+    if (analyticsView === "errors") renderAnErrors(body, countEl);
+    else if (analyticsView === "slow") renderAnSlow(body, countEl);
+    else if (analyticsView === "nplus1") renderAnNplus1(body, countEl);
+  }
+
+  function renderAnErrors(body, countEl) {
+    const errs = rpcLog.filter((r) => r.status === "error");
+    countEl.textContent = `${errs.length} errors`;
+    if (!errs.length) {
+      body.innerHTML = `<div class="text-emerald-300 text-center py-6">// no RPC errors captured</div>`;
+      return;
+    }
+    body.innerHTML = errs
+      .slice()
+      .reverse()
+      .map((r) => {
+        const tb = extractTraceback(r);
+        const id = `errExp${r.id}`;
+        return `
+          <div class="odt-an-err">
+            <div class="head">
+              <span class="t">${escapeHtml(formatHms(r.t))}</span>
+              <span class="meth">${escapeHtml(r.method || "?")}</span>
+              <span class="model">${escapeHtml(r.model || "?")}</span>
+              <span class="dur">${Math.round(r.duration)}ms</span>
+              <span class="spacer"></span>
+              <button class="lnk" data-act="goto" data-id="${r.id}">▶ open in RPC</button>
+              <button class="lnk" data-act="copy" data-id="${r.id}">▶ copy</button>
+            </div>
+            <div class="msg">${escapeHtml(r.error || "(no message)")}</div>
+            ${tb ? `<details id="${id}"><summary>traceback</summary><pre>${escapeHtml(tb)}</pre></details>` : ""}
+          </div>`;
+      })
+      .join("");
+    body.querySelectorAll('[data-act="goto"]').forEach((b) => {
+      b.addEventListener("click", () => {
+        const id = parseInt(b.dataset.id, 10);
+        switchTab("rpc");
+        selectRpc(id);
+      });
+    });
+    body.querySelectorAll('[data-act="copy"]').forEach((b) => {
+      b.addEventListener("click", () => {
+        const r = rpcById.get(parseInt(b.dataset.id, 10));
+        if (!r) return;
+        const tb = extractTraceback(r) || "";
+        copyText(`${r.method} ${r.model}\n${r.error}\n\n${tb}`);
+      });
+    });
+  }
+
+  function extractTraceback(r) {
+    return (r && r.traceback) || null;
+  }
+
+  function renderAnSlow(body, countEl) {
+    const ok = rpcLog.filter((r) => r.status !== "pending");
+    const slow = ok.filter((r) => r.duration > 500);
+    const groups = new Map();
+    for (const r of ok) {
+      const k = `${r.model}|${r.method}`;
+      const g = groups.get(k) || { model: r.model, method: r.method, n: 0, total: 0, max: 0 };
+      g.n++;
+      g.total += r.duration;
+      if (r.duration > g.max) g.max = r.duration;
+      groups.set(k, g);
+    }
+    const top = Array.from(groups.values())
+      .map((g) => ({ ...g, avg: g.total / g.n }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 30);
+    countEl.textContent = `${slow.length} >500ms · ${top.length} groups`;
+    body.innerHTML =
+      `<div class="odt-an-table">
+        <div class="row head"><span>method · model</span><span>n</span><span>avg</span><span>max</span><span>total</span></div>` +
+      top
+        .map((g) => {
+          const cls = g.max > 1500 ? "veryslow" : g.max > 500 ? "slow" : "";
+          return `<div class="row ${cls}">
+            <span class="m">${escapeHtml(g.method || "?")} <span style="color:#64748b">·</span> ${escapeHtml(g.model || "?")}</span>
+            <span>${g.n}</span>
+            <span>${Math.round(g.avg)}ms</span>
+            <span>${Math.round(g.max)}ms</span>
+            <span>${Math.round(g.total)}ms</span>
+          </div>`;
+        })
+        .join("") +
+      `</div>
+       <div class="odt-an-sub">▌ individual calls > 500ms</div>` +
+      (slow.length
+        ? slow
+            .slice()
+            .sort((a, b) => b.duration - a.duration)
+            .slice(0, 50)
+            .map(
+              (r) => `<div class="odt-an-slow">
+              <span class="t">${escapeHtml(formatHms(r.t))}</span>
+              <span class="meth">${escapeHtml(r.method || "?")}</span>
+              <span class="model">${escapeHtml(r.model || "?")}</span>
+              <span class="dur ${r.duration > 1500 ? "veryslow" : "slow"}">${Math.round(r.duration)}ms</span>
+              <button class="lnk" data-id="${r.id}">▶</button>
+            </div>`
+            )
+            .join("")
+        : `<div class="text-slate-500 text-center py-4">// no calls > 500ms</div>`);
+    body.querySelectorAll(".odt-an-slow button").forEach((b) => {
+      b.addEventListener("click", () => {
+        const id = parseInt(b.dataset.id, 10);
+        switchTab("rpc");
+        selectRpc(id);
+      });
+    });
+  }
+
+  function argKey(args) {
+    try {
+      return JSON.stringify(args).slice(0, 200);
+    } catch (e) {
+      return "?";
+    }
+  }
+
+  function renderAnNplus1(body, countEl) {
+    const WINDOW_MS = 2000;
+    const THRESHOLD = 3;
+    const ok = rpcLog.filter((r) => r.status !== "pending").sort((a, b) => a.t - b.t);
+    const buckets = new Map();
+    for (const r of ok) {
+      const k = `${r.model}|${r.method}|${argKey(r.args)}`;
+      const arr = buckets.get(k) || [];
+      arr.push(r);
+      buckets.set(k, arr);
+    }
+    const hits = [];
+    for (const [k, arr] of buckets.entries()) {
+      if (arr.length < THRESHOLD) continue;
+      arr.sort((a, b) => a.t - b.t);
+      for (let i = 0; i + THRESHOLD - 1 < arr.length; i++) {
+        const span = arr[i + THRESHOLD - 1].t - arr[i].t;
+        if (span <= WINDOW_MS) {
+          const j = arr.findIndex((x, idx) => idx >= i && x.t - arr[i].t > WINDOW_MS);
+          const end = j === -1 ? arr.length : j;
+          const slice = arr.slice(i, end);
+          hits.push({
+            key: k,
+            model: slice[0].model,
+            method: slice[0].method,
+            count: slice.length,
+            firstT: slice[0].t,
+            lastT: slice[slice.length - 1].t,
+            ids: slice.map((x) => x.id),
+            argsPreview: argKey(slice[0].args)
+          });
+          i = end - 1;
+        }
+      }
+    }
+    countEl.textContent = `${hits.length} clusters`;
+    if (!hits.length) {
+      body.innerHTML = `<div class="text-emerald-300 text-center py-6">// no N+1 clusters detected (≥3 identical calls within 2s)</div>`;
+      return;
+    }
+    hits.sort((a, b) => b.count - a.count);
+    body.innerHTML = hits
+      .slice(0, 60)
+      .map(
+        (h) => `
+        <div class="odt-an-n1">
+          <div class="head">
+            <span class="meth">${escapeHtml(h.method || "?")}</span>
+            <span class="model">${escapeHtml(h.model || "?")}</span>
+            <span class="dur">${h.count}× in ${h.lastT - h.firstT}ms</span>
+            <span class="spacer"></span>
+            <button class="lnk" data-ids="${h.ids.join(",")}">▶ first</button>
+          </div>
+          <div class="msg" title="${escapeHtml(h.argsPreview)}">args: ${escapeHtml(truncate(h.argsPreview, 200))}</div>
+        </div>`
+      )
+      .join("");
+    body.querySelectorAll(".odt-an-n1 button").forEach((b) => {
+      b.addEventListener("click", () => {
+        const id = parseInt(b.dataset.ids.split(",")[0], 10);
+        switchTab("rpc");
+        selectRpc(id);
+      });
+    });
+  }
+
+  let recFieldsCache = null;
+  let recCurrent = null;
+  function initRecordTab() {
+    shadow.getElementById("odt-rec-load").addEventListener("click", loadFullRecord);
+    shadow.getElementById("odt-rec-id").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loadFullRecord();
+    });
+    shadow.getElementById("odt-rec-model").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loadFullRecord();
+    });
+    shadow.getElementById("odt-rec-page-use").addEventListener("click", () => {
+      const ctx = getActiveCtx();
+      if (ctx.model) shadow.getElementById("odt-rec-model").value = ctx.model;
+      if (ctx.resId) shadow.getElementById("odt-rec-id").value = String(ctx.resId);
+    });
+    shadow.getElementById("odt-rec-copy").addEventListener("click", () => {
+      if (recCurrent) copyText(JSON.stringify(recCurrent.values, null, 2));
+    });
+    shadow.getElementById("odt-oc-run").addEventListener("click", runOnchange);
+    const combo = createCombo(shadow.getElementById("odt-oc-field-combo"), {
+      placeholder: "pick field…",
+      searchPlaceholder: "filter fields…"
+    });
+    shadow.getElementById("odt-oc-field-combo").__combo = combo;
+  }
+
+  function updateRecordHint() {
+    updatePageHint();
+  }
+
+  async function loadFullRecord() {
+    const model = shadow.getElementById("odt-rec-model").value.trim();
+    const idRaw = shadow.getElementById("odt-rec-id").value.trim();
+    const id = parseInt(idRaw, 10);
+    const out = shadow.getElementById("odt-rec-out");
+    const copyBtn = shadow.getElementById("odt-rec-copy");
+    const ocOut = shadow.getElementById("odt-oc-out");
+    const ocRun = shadow.getElementById("odt-oc-run");
+    if (!model || Number.isNaN(id)) {
+      out.className = "odt-output err";
+      out.textContent = "// need model + numeric id";
+      return;
+    }
+    out.className = "odt-output muted";
+    out.textContent = "// loading fields_get + read…";
+    try {
+      const fields = await callKw(model, "fields_get", [], {
+        attributes: ["string", "type", "readonly", "store", "compute", "relation"]
+      });
+      const allNames = Object.keys(fields);
+      const rows = await callKw(model, "read", [[id], allNames]);
+      if (!rows || !rows[0]) {
+        out.className = "odt-output err";
+        out.textContent = `// no record ${model}#${id}`;
+        return;
+      }
+      recCurrent = { model, id, fields, values: rows[0] };
+      recFieldsCache = fields;
+      out.className = "odt-output";
+      out.innerHTML = renderRecordJson(rows[0], fields);
+      copyBtn.disabled = false;
+      const writable = Object.entries(fields)
+        .filter(([, f]) => !f.readonly && !f.compute)
+        .map(([n, f]) => ({
+          value: n,
+          label: `${n} · ${f.type}${f.string ? " · " + f.string : ""}`
+        }))
+        .sort((a, b) => a.value.localeCompare(b.value));
+      const combo = shadow.getElementById("odt-oc-field-combo").__combo;
+      if (combo) combo.setOptions(writable);
+      ocRun.disabled = !writable.length;
+      ocOut.className = "odt-output muted";
+      ocOut.textContent = "// pick field + value, then Run";
+    } catch (e) {
+      out.className = "odt-output err";
+      out.textContent = `// error: ${e.message}`;
+      copyBtn.disabled = true;
+    }
+  }
+
+  function renderRecordJson(vals, fields) {
+    const keys = Object.keys(vals).sort();
+    return keys
+      .map((k) => {
+        const f = fields[k] || {};
+        const t = f.type || "?";
+        const v = vals[k];
+        const vStr = v === false ? "false" : v === null ? "null" : JSON.stringify(v);
+        const rel = f.relation
+          ? ` <span style="color:#a5b4fc">→ ${escapeHtml(f.relation)}</span>`
+          : "";
+        const flag = f.compute
+          ? ` <span style="color:#c4b5fd;font-size:9px">[comp]</span>`
+          : f.readonly
+            ? ` <span style="color:#64748b;font-size:9px">[ro]</span>`
+            : "";
+        return `<div style="display:flex;gap:8px;padding:2px 0;border-bottom:1px dashed rgba(100,116,139,0.15)">
+          <span style="color:#94a3b8;min-width:140px">${escapeHtml(k)}</span>
+          <span style="color:#64748b;font-size:10px;min-width:80px">${escapeHtml(t)}${rel}${flag}</span>
+          <span style="color:#e2e8f0;flex:1;word-break:break-all">${escapeHtml(truncate(vStr, 400))}</span>
+        </div>`;
+      })
+      .join("");
+  }
+
+  async function runOnchange() {
+    if (!recCurrent) return;
+    const combo = shadow.getElementById("odt-oc-field-combo").__combo;
+    const field = combo && combo.getValue();
+    const rawVal = shadow.getElementById("odt-oc-value").value;
+    const out = shadow.getElementById("odt-oc-out");
+    if (!field) {
+      out.className = "odt-output err";
+      out.textContent = "// pick a field";
+      return;
+    }
+    const fdef = recCurrent.fields[field] || {};
+    let parsed;
+    try {
+      parsed = parseOnchangeValue(rawVal, fdef.type);
+    } catch (e) {
+      out.className = "odt-output err";
+      out.textContent = `// value parse error: ${e.message}`;
+      return;
+    }
+    const before = JSON.parse(JSON.stringify(recCurrent.values));
+    const next = { ...before, [field]: parsed };
+    const allFieldsSpec = {};
+    for (const k of Object.keys(recCurrent.fields)) allFieldsSpec[k] = {};
+    out.className = "odt-output muted";
+    out.textContent = "// calling onchange…";
+    try {
+      const result = await callKw(recCurrent.model, "onchange", [
+        [recCurrent.id],
+        next,
+        [field],
+        allFieldsSpec
+      ]);
+      const updates = (result && result.value) || {};
+      const warning = result && result.warning;
+      const domain = result && result.domain;
+      const keys = Object.keys(updates);
+      out.className = "odt-output";
+      out.innerHTML =
+        (warning
+          ? `<div style="color:#fda4af;padding:4px 0">⚠ ${escapeHtml(warning.title || "")}: ${escapeHtml(warning.message || "")}</div>`
+          : "") +
+        (keys.length
+          ? `<div style="color:#f59e0b;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:4px">▌ updates (${keys.length})</div>` +
+            keys
+              .map((k) => {
+                const oldV = JSON.stringify(before[k]);
+                const newV = JSON.stringify(updates[k]);
+                const same = oldV === newV;
+                return `<div style="display:flex;gap:8px;padding:2px 0;border-bottom:1px dashed rgba(100,116,139,0.15)">
+                  <span style="color:#94a3b8;min-width:140px">${escapeHtml(k)}</span>
+                  <span style="color:#fda4af;flex:1;text-decoration:${same ? "none" : "line-through"};word-break:break-all">${escapeHtml(truncate(oldV, 200))}</span>
+                  <span style="color:${same ? "#64748b" : "#6ee7b7"};flex:1;word-break:break-all">${escapeHtml(truncate(newV, 200))}</span>
+                </div>`;
+              })
+              .join("")
+          : `<div style="color:#64748b">// no field updates returned</div>`) +
+        (domain
+          ? `<div style="margin-top:6px;color:#a5b4fc;font-size:11px">domain: ${escapeHtml(JSON.stringify(domain))}</div>`
+          : "");
+    } catch (e) {
+      out.className = "odt-output err";
+      out.textContent = `// onchange failed: ${e.message}`;
+    }
+  }
+
+  function parseOnchangeValue(raw, type) {
+    if (raw === "") {
+      if (type === "boolean") return false;
+      return false;
+    }
+    if (type === "boolean") {
+      const v = raw.toLowerCase();
+      if (v === "true" || v === "1") return true;
+      if (v === "false" || v === "0") return false;
+      throw new Error("expected true/false");
+    }
+    if (type === "integer" || type === "many2one") {
+      const n = parseInt(raw, 10);
+      if (Number.isNaN(n)) throw new Error("expected integer id");
+      return n;
+    }
+    if (type === "float" || type === "monetary") {
+      const n = parseFloat(raw);
+      if (Number.isNaN(n)) throw new Error("expected number");
+      return n;
+    }
+    if (type === "one2many" || type === "many2many") {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        throw new Error("expected JSON array (e.g. [[6,0,[1,2]]])");
+      }
+    }
+    if (
+      raw.startsWith("[") ||
+      raw.startsWith("{") ||
+      raw === "null" ||
+      raw === "true" ||
+      raw === "false"
+    ) {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {}
+    }
+    return raw;
   }
 
   build();
