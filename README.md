@@ -34,10 +34,10 @@ operands target the related model, not in the payload), special tokens skipped (
 
 ## Architecture
 
-| File             | World    | Role                                                            |
-| ---------------- | -------- | --------------------------------------------------------------- |
+| File             | World    | Role                                                             |
+| ---------------- | -------- | ---------------------------------------------------------------- |
 | `interceptor.js` | MAIN     | Patches `fetch`/`XHR`, scans `get_views`, dispatches a DOM event |
-| `ui.js`          | ISOLATED | Shadow-DOM panel (Tailwind), tools, `call_kw` RPC, JSON export    |
+| `ui.js`          | ISOLATED | Shadow-DOM panel (Tailwind), tools, `call_kw` RPC, JSON export   |
 | `toolkit.css`    | —        | Compiled Tailwind, injected into the shadow root                 |
 
 The UI lives in a Shadow DOM so Odoo's CSS and the extension's never collide.
@@ -52,6 +52,22 @@ npm install      # or rely on npx
 npm run build    # tailwindcss -i src/input.css -o toolkit.css --minify
 # npm run watch  # rebuild on change
 ```
+
+## Development
+
+Common tasks are wrapped in a `Makefile` (each delegates to an npm script):
+
+```bash
+make install       # install dev dependencies
+make lint          # ESLint
+make format        # Prettier (write)
+make format-check  # Prettier (check only)
+make test          # node --test smoke suite
+make check         # lint + format-check + test
+```
+
+Tooling: **ESLint** (`eslint.config.js`), **Prettier** (`.prettierrc.json`), tests via Node's
+built-in runner in `test/` (syntax checks + manifest validation).
 
 ## Install (unpacked)
 

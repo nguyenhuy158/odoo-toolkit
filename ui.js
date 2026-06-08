@@ -135,8 +135,9 @@
     shadow.getElementById("odt-min").addEventListener("click", () => toggle(false));
     shadow.getElementById("odt-clear").addEventListener("click", clear);
     shadow.getElementById("odt-export").addEventListener("click", exportJson);
-    shadow.querySelectorAll(".odt-tab").forEach((b) =>
-      b.addEventListener("click", () => switchTab(b.dataset.tab)));
+    shadow
+      .querySelectorAll(".odt-tab")
+      .forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
     shadow.getElementById("odt-load").addEventListener("click", loadRecord);
     shadow.getElementById("odt-set-true").addEventListener("click", () => setNoupdate(true));
     shadow.getElementById("odt-set-false").addEventListener("click", () => setNoupdate(false));
@@ -184,10 +185,15 @@
       listEl.innerHTML = `<div class="text-slate-500 text-center py-6">No issues detected yet. Navigate Odoo views…</div>`;
       return;
     }
-    listEl.innerHTML = problems.map((p) => {
-      const b = BADGE[p.category] || { label: p.category.toUpperCase(), cls: "bg-slate-300 text-slate-900" };
-      const inRaw = p.raw !== p.field ? ` <span class="text-slate-500">in ${escapeHtml(p.raw)}</span>` : "";
-      return `
+    listEl.innerHTML = problems
+      .map((p) => {
+        const b = BADGE[p.category] || {
+          label: p.category.toUpperCase(),
+          cls: "bg-slate-300 text-slate-900"
+        };
+        const inRaw =
+          p.raw !== p.field ? ` <span class="text-slate-500">in ${escapeHtml(p.raw)}</span>` : "";
+        return `
         <div class="rounded-md bg-slate-800/70 px-3 py-2 border border-slate-700">
           <span class="inline-block rounded px-1.5 py-0.5 text-[10px] font-bold mr-1.5 ${b.cls}">${b.label}</span>
           <span class="text-sky-300">${escapeHtml(p.model)}</span>
@@ -195,7 +201,8 @@
           <span class="text-amber-200 font-bold">${escapeHtml(p.field)}</span>
           <span class="text-slate-500">not in model</span>${inRaw}
         </div>`;
-    }).join("");
+      })
+      .join("");
   }
 
   let currentImd = null;
@@ -207,19 +214,35 @@
     let domain;
     if (xmlid.includes(".")) {
       const idx = xmlid.indexOf(".");
-      domain = [["module", "=", xmlid.slice(0, idx)], ["name", "=", xmlid.slice(idx + 1)]];
+      domain = [
+        ["module", "=", xmlid.slice(0, idx)],
+        ["name", "=", xmlid.slice(idx + 1)]
+      ];
     } else if (model && resId) {
-      domain = [["model", "=", model], ["res_id", "=", parseInt(resId, 10)]];
+      domain = [
+        ["model", "=", model],
+        ["res_id", "=", parseInt(resId, 10)]
+      ];
     } else {
-      return showStatus(`<span class="text-rose-300">Enter an XML ID, or both model and res_id.</span>`, false);
+      return showStatus(
+        `<span class="text-rose-300">Enter an XML ID, or both model and res_id.</span>`,
+        false
+      );
     }
     try {
-      const rows = await callKw("ir.model.data", "search_read",
-        [domain, ["id", "module", "name", "model", "res_id", "noupdate"]], { limit: 1 });
+      const rows = await callKw(
+        "ir.model.data",
+        "search_read",
+        [domain, ["id", "module", "name", "model", "res_id", "noupdate"]],
+        { limit: 1 }
+      );
       if (!rows.length) {
         currentImd = null;
         showActions(false);
-        return showStatus(`<span class="text-rose-300">No ir.model.data record found.</span>`, true);
+        return showStatus(
+          `<span class="text-rose-300">No ir.model.data record found.</span>`,
+          true
+        );
       }
       currentImd = rows[0];
       renderStatus();
@@ -238,8 +261,10 @@
       : `<span class="inline-block rounded px-1.5 py-0.5 text-[10px] font-bold bg-emerald-400 text-slate-900">False</span>`;
     showStatus(
       `<div><span class="text-slate-400">xml id:</span> <span class="font-mono text-emerald-300">${escapeHtml(r.module)}.${escapeHtml(r.name)}</span></div>` +
-      `<div><span class="text-slate-400">target:</span> <span class="font-mono text-sky-300">${escapeHtml(r.model)}</span> #${r.res_id}</div>` +
-      `<div><span class="text-slate-400">noupdate:</span> ${pill}</div>`, true);
+        `<div><span class="text-slate-400">target:</span> <span class="font-mono text-sky-300">${escapeHtml(r.model)}</span> #${r.res_id}</div>` +
+        `<div><span class="text-slate-400">noupdate:</span> ${pill}</div>`,
+      true
+    );
   }
 
   function showStatus(html, show) {
@@ -254,7 +279,8 @@
 
   async function setNoupdate(value) {
     if (!currentImd) return;
-    if (!window.confirm(`Set noupdate = ${value} on ${currentImd.module}.${currentImd.name}?`)) return;
+    if (!window.confirm(`Set noupdate = ${value} on ${currentImd.module}.${currentImd.name}?`))
+      return;
     try {
       await callKw("ir.model.data", "write", [[currentImd.id], { noupdate: value }]);
       currentImd.noupdate = value;
@@ -265,8 +291,10 @@
   }
 
   function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    return String(s).replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+    );
   }
 
   function ingest(list) {

@@ -2,7 +2,7 @@
 module.exports = {
   content: ["./ui.js", "./interceptor.js"],
   theme: {
-    extend: {},
+    extend: {}
   },
-  plugins: [],
+  plugins: []
 };
