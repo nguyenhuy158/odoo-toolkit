@@ -5,6 +5,9 @@
 
   const HOST_ID = "__odt_gh_runner_badge__";
   const BACK_ID = "__odt_gh_back_pr__";
+  const ANIM_ID = "__odt_gh_anim_toggle__";
+  const ANIM_STYLE_ID = "__odt_gh_anim_kill_style__";
+  const ANIM_STORAGE_KEY = "__odt_gh_anim_disabled__";
   let observer = null;
   let lastUrl = location.href;
   let lastInfo = null;
@@ -313,14 +316,151 @@
     return a.href === b.href && a.prNumber === b.prNumber;
   }
 
+  function isAnimDisabled() {
+    try {
+      return localStorage.getItem(ANIM_STORAGE_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function setAnimDisabled(v) {
+    try {
+      if (v) localStorage.setItem(ANIM_STORAGE_KEY, "1");
+      else localStorage.removeItem(ANIM_STORAGE_KEY);
+    } catch (e) {}
+    applyAnimKill(v);
+  }
+
+  function applyAnimKill(disabled) {
+    const existing = document.getElementById(ANIM_STYLE_ID);
+    if (!disabled) {
+      if (existing) existing.remove();
+      return;
+    }
+    if (existing) return;
+    const style = document.createElement("style");
+    style.id = ANIM_STYLE_ID;
+    style.textContent = `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+        scroll-behavior: auto !important;
+      }
+      .anim-rotate, [class*="spinner"], [class*="Spinner"] {
+        animation: none !important;
+        transform: none !important;
+      }
+      svg.octicon[class*="-progress"], .progress-pjax-loader,
+      .Progress, .Progress-item { animation: none !important; }
+      #${ANIM_ID} .knob, #${HOST_ID} .badge, #${BACK_ID} .back {
+        transition: opacity 0.18s, transform 0.18s, background 0.18s, color 0.12s, border-color 0.15s, box-shadow 0.15s !important;
+      }
+    `;
+    document.documentElement.appendChild(style);
+  }
+
+  function ensureAnimToggleHost() {
+    let host = document.getElementById(ANIM_ID);
+    if (host) return host;
+    host = document.createElement("div");
+    host.id = ANIM_ID;
+    host.style.cssText =
+      "position:fixed;bottom:140px;left:20px;z-index:2147483646;pointer-events:auto;";
+    document.documentElement.appendChild(host);
+    const shadow = host.attachShadow({ mode: "open" });
+    const style = document.createElement("style");
+    style.textContent = `
+      :host { all: initial; }
+      .pill {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-family: "JetBrains Mono","SF Mono",Menlo,monospace;
+        background: linear-gradient(180deg,#0f172a 0%,#1e293b 100%);
+        color: #e2e8f0;
+        border: 1px solid rgba(167,139,250,0.45);
+        border-radius: 999px;
+        padding: 6px 12px 6px 10px;
+        box-shadow: 0 6px 18px -8px rgba(0,0,0,0.5), 0 0 14px rgba(167,139,250,0.15);
+        opacity: 0; transform: translateY(8px);
+        transition: opacity .18s, transform .18s, box-shadow .15s, border-color .15s;
+        cursor: pointer;
+        user-select: none;
+      }
+      .pill.show { opacity: 1; transform: translateY(0); }
+      .pill:hover { border-color: #a78bfa; box-shadow: 0 8px 22px -8px rgba(0,0,0,0.6), 0 0 20px rgba(167,139,250,0.3); }
+      .pill .label {
+        font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #94a3b8;
+      }
+      .pill .label .v { color: #c4b5fd; font-weight: 700; }
+      .switch {
+        position: relative; width: 32px; height: 16px;
+        border-radius: 999px;
+        background: #1e293b;
+        box-shadow: inset 0 0 0 1px rgba(100,116,139,0.4);
+        transition: background .18s, box-shadow .18s;
+      }
+      .switch .knob {
+        position: absolute; top: 2px; left: 2px;
+        width: 12px; height: 12px; border-radius: 50%;
+        background: #f8fafc;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        transition: transform .2s cubic-bezier(.4,.0,.2,1), background .18s;
+      }
+      .pill[data-on="true"] .switch {
+        background: linear-gradient(180deg,#a78bfa,#7c3aed);
+        box-shadow: inset 0 0 0 1px rgba(167,139,250,0.5), 0 0 8px rgba(167,139,250,0.4);
+      }
+      .pill[data-on="true"] .switch .knob { transform: translateX(16px); background: #ede9fe; }
+      .pill[data-on="true"] .label .v { color: #c4b5fd; }
+      .pill[data-on="false"] .label .v { color: #64748b; }
+    `;
+    shadow.appendChild(style);
+    const pill = document.createElement("div");
+    pill.className = "pill";
+    pill.title = "Toggle CSS animations on this page";
+    pill.innerHTML = `
+      <div class="switch"><span class="knob"></span></div>
+      <span class="label">anim <span class="v">on</span></span>
+    `;
+    shadow.appendChild(pill);
+    host.__pill = pill;
+    pill.addEventListener("click", () => {
+      const next = pill.dataset.on !== "true";
+      pill.dataset.on = String(next);
+      pill.querySelector(".label .v").textContent = next ? "off" : "on";
+      setAnimDisabled(next);
+    });
+    return host;
+  }
+
+  function renderAnimToggle() {
+    const host = ensureAnimToggleHost();
+    const pill = host.__pill;
+    const disabled = isAnimDisabled();
+    pill.dataset.on = String(disabled);
+    pill.querySelector(".label .v").textContent = disabled ? "off" : "on";
+    requestAnimationFrame(() => pill.classList.add("show"));
+  }
+
+  function removeAnimToggle() {
+    const host = document.getElementById(ANIM_ID);
+    if (host) host.remove();
+  }
+
   function check() {
     if (!isActionsPage()) {
       removeBadge();
       removeBack();
+      removeAnimToggle();
       lastInfo = null;
       lastBack = null;
       return;
     }
+    renderAnimToggle();
+    applyAnimKill(isAnimDisabled());
     const info = scanLogText();
     if (info && !sameInfo(info, lastInfo)) {
       lastInfo = info;
@@ -352,6 +492,7 @@
         }
         removeBadge();
         removeBack();
+        removeAnimToggle();
       }
       check();
     });
