@@ -69,6 +69,17 @@ make check         # lint + format-check + test
 Tooling: **ESLint** (`eslint.config.js`), **Prettier** (`.prettierrc.json`), tests via Node's
 built-in runner in `test/` (syntax checks + manifest validation).
 
+### Pre-commit hook
+
+A [husky](https://typicode.github.io/husky/) `pre-commit` hook runs automatically on every
+commit (installed via `npm install` → `prepare` script). It blocks the commit unless:
+
+1. The branch name follows the convention (`scripts/check-branch-name.sh`):
+   `main`, `develop`, or `<type>/<desc>` where `type ∈ feature|fix|chore|docs|refactor|test|hotfix|claude`.
+2. `make check` passes — **lint + format-check + test**.
+
+Bypass in an emergency with `git commit --no-verify` (not recommended).
+
 ## Install (unpacked)
 
 1. `chrome://extensions` → enable **Developer mode**
