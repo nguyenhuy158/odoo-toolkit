@@ -5,9 +5,19 @@
   "description": "Chrome extension toolkit for Odoo developers.",
   "scripts": {
     "build": "tailwindcss -c tailwind.config.js -i src/input.css -o toolkit.css --minify",
-    "watch": "tailwindcss -c tailwind.config.js -i src/input.css -o toolkit.css --watch"
+    "watch": "tailwindcss -c tailwind.config.js -i src/input.css -o toolkit.css --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "test": "node --test",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.0.0",
     "tailwindcss": "^3.4.0"
   }
 }

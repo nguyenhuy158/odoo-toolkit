@@ -4,8 +4,24 @@
   const RPC_MATCH = "call_kw";
   const EVENT = "__odoo_dev_toolkit__";
   const OPERATORS = new Set([
-    "=", "!=", "<", ">", "<=", ">=", "in", "not in", "like", "not like",
-    "ilike", "not ilike", "=like", "=ilike", "child_of", "parent_of", "any", "not any"
+    "=",
+    "!=",
+    "<",
+    ">",
+    "<=",
+    ">=",
+    "in",
+    "not in",
+    "like",
+    "not like",
+    "ilike",
+    "not ilike",
+    "=like",
+    "=ilike",
+    "child_of",
+    "parent_of",
+    "any",
+    "not any"
   ]);
   const SKIP_TOKENS = new Set(["parent", "id", "uid", "active_id", "context", "self"]);
 
@@ -73,21 +89,28 @@
   function checkAttributes(el, model, models, viewType) {
     const modifiers = el.getAttribute("modifiers");
     if (modifiers) {
-      try { walkModifiers(JSON.parse(modifiers), model, models, viewType); } catch (e) {}
+      try {
+        walkModifiers(JSON.parse(modifiers), model, models, viewType);
+      } catch (e) {}
     }
     const attrs = el.getAttribute("attrs");
-    if (attrs) domainOperands(attrs).forEach((f) => checkField(model, f, models, viewType, "modifier"));
+    if (attrs)
+      domainOperands(attrs).forEach((f) => checkField(model, f, models, viewType, "modifier"));
 
     const groupby = el.getAttribute("groupby");
     if (groupby) checkField(model, groupby, models, viewType, "groupby");
 
     const context = el.getAttribute("context");
-    if (context) groupByFields(context).forEach((f) => checkField(model, f, models, viewType, "groupby"));
+    if (context)
+      groupByFields(context).forEach((f) => checkField(model, f, models, viewType, "groupby"));
 
     if (viewType === "search") {
       for (const attr of ["domain", "filter_domain"]) {
         const val = el.getAttribute(attr);
-        if (val) domainOperands(val).forEach((f) => checkField(model, f, models, viewType, "search-domain"));
+        if (val)
+          domainOperands(val).forEach((f) =>
+            checkField(model, f, models, viewType, "search-domain")
+          );
       }
     }
   }
@@ -134,7 +157,8 @@
     for (const p of problems) {
       console.error(
         `[${p.category}] model "${p.model}" <${p.viewType}> -> "${p.field}"` +
-        (p.raw !== p.field ? ` (in "${p.raw}")` : "") + " does NOT exist"
+          (p.raw !== p.field ? ` (in "${p.raw}")` : "") +
+          " does NOT exist"
       );
     }
     console.info("RPC:", url);
@@ -155,7 +179,11 @@
       try {
         const url = typeof args[0] === "string" ? args[0] : (args[0] && args[0].url) || "";
         if (url.includes(RPC_MATCH)) {
-          res.clone().text().then((t) => maybeCheck(t, url)).catch(() => {});
+          res
+            .clone()
+            .text()
+            .then((t) => maybeCheck(t, url))
+            .catch(() => {});
         }
       } catch (e) {}
       return res;
