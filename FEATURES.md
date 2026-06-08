@@ -20,6 +20,7 @@ Theo dõi trạng thái các tool trong panel. Cập nhật cột **Status** khi
 | Context viewer       | ✅     | uid/company/lang/tz/groups, switch company, debug/assets/cache actions.            |
 | Searchable lang/cmbo | ✅     | Generic `createCombo()` factory tái dùng (lang, company, action).                  |
 | GH Actions runner    | ✅     | Sticky badge top-right trên `github.com/*/actions/runs/*` show runner/group/ver.   |
+| GH back-to-PR        | ✅     | Floating pill bottom-left link về PR khi scroll log dài (clone "Back to PR #…").   |
 
 ---
 
