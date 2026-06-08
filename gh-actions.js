@@ -9,6 +9,8 @@
   let lastUrl = location.href;
   let lastInfo = null;
   let lastBack = null;
+  let autoExpandTried = false;
+  let autoExpandWaiter = null;
 
   function isActionsPage() {
     return /\/actions\/runs\/\d+/.test(location.pathname);
@@ -30,10 +32,46 @@
     return Object.keys(info).length ? info : null;
   }
 
+  function findSetupHeader() {
+    const headers = Array.from(
+      document.querySelectorAll("summary, button, [role='button'], .ActionListItem")
+    );
+    return headers.find((el) => {
+      const firstLine = ((el.textContent || "").trim().split(/\n/)[0] || "").trim();
+      return /^set up job$/i.test(firstLine);
+    });
+  }
+
+  function isSetupHeaderExpanded(el) {
+    if (!el) return false;
+    if (el.getAttribute("aria-expanded") === "true") return true;
+    if (el.tagName === "SUMMARY" && el.parentElement && el.parentElement.open) return true;
+    const closest = el.closest("[aria-expanded]");
+    if (closest && closest.getAttribute("aria-expanded") === "true") return true;
+    return false;
+  }
+
+  function tryAutoExpandSetupJob() {
+    if (autoExpandTried) return false;
+    const header = findSetupHeader();
+    if (!header) return false;
+    if (isSetupHeaderExpanded(header)) {
+      autoExpandTried = true;
+      return false;
+    }
+    autoExpandTried = true;
+    try {
+      header.click();
+    } catch (e) {
+      return false;
+    }
+    if (autoExpandWaiter) clearTimeout(autoExpandWaiter);
+    autoExpandWaiter = setTimeout(check, 400);
+    return true;
+  }
+
   function scanLogText() {
-    const setupHeader = Array.from(
-      document.querySelectorAll("summary, button, .ActionListItem")
-    ).find((el) => /set up job/i.test(el.textContent || ""));
+    const setupHeader = findSetupHeader();
     if (setupHeader) {
       const container =
         setupHeader.closest("details, .js-checks-step, .timeline-comment, section") ||
@@ -61,7 +99,7 @@
     host = document.createElement("div");
     host.id = HOST_ID;
     host.style.cssText =
-      "position:fixed;top:60px;right:16px;z-index:2147483646;pointer-events:auto;";
+      "position:fixed;bottom:72px;left:20px;z-index:2147483646;pointer-events:auto;";
     document.documentElement.appendChild(host);
     const shadow = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");
@@ -81,7 +119,7 @@
         user-select: text;
         transition: transform .15s, box-shadow .15s, opacity .2s;
         opacity: 0;
-        transform: translateY(-6px);
+        transform: translateY(8px);
       }
       .badge.show { opacity: 1; transform: translateY(0); }
       .badge:hover { box-shadow: 0 12px 30px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(15,23,42,0.5), 0 0 24px rgba(52,211,153,0.25); }
@@ -287,6 +325,8 @@
     if (info && !sameInfo(info, lastInfo)) {
       lastInfo = info;
       render(info);
+    } else if (!info && !lastInfo) {
+      tryAutoExpandSetupJob();
     }
     const back = findBackLink();
     if (back && !sameBack(back, lastBack)) {
@@ -305,6 +345,11 @@
         lastUrl = location.href;
         lastInfo = null;
         lastBack = null;
+        autoExpandTried = false;
+        if (autoExpandWaiter) {
+          clearTimeout(autoExpandWaiter);
+          autoExpandWaiter = null;
+        }
         removeBadge();
         removeBack();
       }
