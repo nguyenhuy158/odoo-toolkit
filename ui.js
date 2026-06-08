@@ -896,6 +896,90 @@
         font-size: 10px;
       }
       .odt-menu-badge button:hover { color: #fbbf24; background: rgba(251,191,36,0.1); }
+      .odt-an-err {
+        margin-bottom: 8px; padding: 8px 10px;
+        background: rgba(244,63,94,0.07);
+        border-left: 2px solid #f43f5e;
+        border-radius: 0 4px 4px 0;
+      }
+      .odt-an-err .head { display: flex; gap: 8px; align-items: baseline; }
+      .odt-an-err .head .spacer { flex: 1; }
+      .odt-an-err .head .t { color: #64748b; font-size: 10px; }
+      .odt-an-err .head .meth { color: #7dd3fc; font-weight: 700; }
+      .odt-an-err .head .model { color: #fbbf24; }
+      .odt-an-err .head .dur { color: #64748b; font-size: 10px; }
+      .odt-an-err .head .lnk {
+        all: unset; cursor: pointer; color: #94a3b8; font-size: 10px;
+        padding: 1px 5px; border-radius: 3px;
+      }
+      .odt-an-err .head .lnk:hover { color: #6ee7b7; background: rgba(52,211,153,0.1); }
+      .odt-an-err .msg { color: #fda4af; margin: 4px 0; word-break: break-word; }
+      .odt-an-err details {
+        margin-top: 4px; font-size: 10.5px;
+        background: rgba(15,23,42,0.4); border-radius: 4px;
+        padding: 0 8px;
+      }
+      .odt-an-err details summary {
+        cursor: pointer; color: #94a3b8; padding: 4px 0;
+        list-style: none; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+      }
+      .odt-an-err details summary::-webkit-details-marker { display: none; }
+      .odt-an-err details pre {
+        color: #cbd5e1; padding: 0 0 8px;
+        white-space: pre-wrap; word-break: break-word; font-size: 10px; line-height: 1.4;
+      }
+      .odt-an-table { display: grid; gap: 0; }
+      .odt-an-table .row {
+        display: grid; grid-template-columns: 1fr 50px 70px 70px 70px;
+        gap: 8px; padding: 4px 8px; align-items: center;
+        border-bottom: 1px dashed rgba(100,116,139,0.15);
+      }
+      .odt-an-table .row.head {
+        color: #f59e0b; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+        border-bottom-color: rgba(245,158,11,0.3); padding-top: 6px; padding-bottom: 6px;
+      }
+      .odt-an-table .row .m { color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .odt-an-table .row.slow .m { color: #fbbf24; }
+      .odt-an-table .row.veryslow .m { color: #fda4af; }
+      .odt-an-sub {
+        margin-top: 14px; color: #f59e0b;
+        font: 700 9px/1 "JetBrains Mono",ui-monospace,monospace;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        padding-bottom: 4px; border-bottom: 1px dashed rgba(245,158,11,0.3);
+      }
+      .odt-an-slow {
+        display: grid; grid-template-columns: 80px 1fr 1fr 70px 30px;
+        gap: 8px; padding: 3px 0; align-items: center;
+        border-bottom: 1px dashed rgba(100,116,139,0.1);
+      }
+      .odt-an-slow .t { color: #64748b; font-size: 10px; }
+      .odt-an-slow .meth { color: #7dd3fc; }
+      .odt-an-slow .model { color: #fbbf24; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .odt-an-slow .dur { text-align: right; }
+      .odt-an-slow .dur.slow { color: #fbbf24; }
+      .odt-an-slow .dur.veryslow { color: #fda4af; }
+      .odt-an-slow button {
+        all: unset; cursor: pointer; color: #94a3b8;
+        text-align: center; padding: 0 4px; border-radius: 3px;
+      }
+      .odt-an-slow button:hover { color: #6ee7b7; background: rgba(52,211,153,0.1); }
+      .odt-an-n1 {
+        margin-bottom: 6px; padding: 6px 10px;
+        background: rgba(167,139,250,0.07);
+        border-left: 2px solid #a78bfa;
+        border-radius: 0 4px 4px 0;
+      }
+      .odt-an-n1 .head { display: flex; gap: 8px; align-items: baseline; }
+      .odt-an-n1 .head .spacer { flex: 1; }
+      .odt-an-n1 .head .meth { color: #7dd3fc; font-weight: 700; }
+      .odt-an-n1 .head .model { color: #fbbf24; }
+      .odt-an-n1 .head .dur { color: #c4b5fd; font-weight: 700; }
+      .odt-an-n1 .head .lnk {
+        all: unset; cursor: pointer; color: #94a3b8; font-size: 10px;
+        padding: 1px 5px; border-radius: 3px;
+      }
+      .odt-an-n1 .head .lnk:hover { color: #6ee7b7; background: rgba(52,211,153,0.1); }
+      .odt-an-n1 .msg { color: #94a3b8; font-size: 10px; margin-top: 2px; word-break: break-all; }
     `;
     shadow.appendChild(style);
 
@@ -955,6 +1039,10 @@
             class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">inspect</button>
           <button data-tab="ctx"
             class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">context</button>
+          <button data-tab="analytics"
+            class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">analytics</button>
+          <button data-tab="record"
+            class="odt-tab whitespace-nowrap px-3 py-1 text-xs rounded-t-md bg-slate-800 cursor-pointer border-b-2 border-transparent text-slate-400 hover:text-slate-200">record</button>
         </div>
 
         <div id="odt-tab-detector" class="flex-1 overflow-auto flex flex-col min-h-0">
@@ -1227,6 +1315,63 @@ for p in partners:
           </div>
         </div>
 
+        <div id="odt-tab-analytics" class="hidden flex-1 flex flex-col min-h-0">
+          <div class="odt-rpc-toolbar odt-mono">
+            <div class="odt-seg" id="odt-an-view-seg">
+              <button data-view="errors" class="active">ERRORS</button>
+              <button data-view="slow">SLOW</button>
+              <button data-view="nplus1">N+1</button>
+            </div>
+            <span class="spacer"></span>
+            <span class="stat"><span class="n" id="odt-an-count">0</span></span>
+            <button id="odt-an-refresh" class="odt-mini-btn">▶ refresh</button>
+            <button id="odt-an-clear" class="odt-mini-btn">▶ clear log</button>
+          </div>
+          <div id="odt-an-body" class="flex-1 overflow-auto px-3 py-2 odt-mono text-xs">
+            <div class="text-slate-500 text-center py-6">// no data — interact with Odoo first</div>
+          </div>
+        </div>
+
+        <div id="odt-tab-record" class="hidden flex-1 overflow-auto">
+          <div class="odt-pane odt-mono">
+            <h4>▌ record inspector</h4>
+            <div class="odt-row-input">
+              <label class="odt-field"><span>model</span>
+                <input id="odt-rec-model" class="odt-input" type="text" placeholder="res.partner"/>
+              </label>
+              <label class="odt-field"><span>id</span>
+                <input id="odt-rec-id" class="odt-input" type="number" placeholder="1"/>
+              </label>
+              <button id="odt-rec-load" class="odt-btn-exec">Load</button>
+            </div>
+            <div class="odt-page-bar">
+              <span id="odt-rec-page-hint"><span class="muted">// no active record detected</span></span>
+              <span class="spacer"></span>
+              <button id="odt-rec-page-use" class="odt-mini-btn">▶ use active</button>
+            </div>
+            <div id="odt-rec-out" class="odt-output muted" style="max-height:300px;overflow:auto">// enter model + id</div>
+            <div class="odt-row-input" style="margin-top:6px">
+              <span></span>
+              <button id="odt-rec-copy" class="odt-mini-btn" disabled>▶ copy JSON</button>
+            </div>
+
+            <div class="odt-section" style="margin-top:18px">
+              <span class="odt-section-label">▌ onchange tester</span>
+              <p class="hint">Pick a field to mutate. Calls <code>onchange</code> with current record + new value, shows the diff Odoo would apply.</p>
+              <div class="odt-row-input">
+                <label class="odt-field"><span>field</span>
+                  <div id="odt-oc-field-combo" class="odt-combo" data-open="false" style="min-width:160px"></div>
+                </label>
+                <label class="odt-field"><span>new value</span>
+                  <input id="odt-oc-value" class="odt-input" type="text" placeholder="JSON literal or string"/>
+                </label>
+                <button id="odt-oc-run" class="odt-btn-exec" disabled>Run</button>
+              </div>
+              <div id="odt-oc-out" class="odt-output muted" style="max-height:240px;overflow:auto">// load a record first</div>
+            </div>
+          </div>
+        </div>
+
         <div id="odt-tab-models" class="hidden flex-1 flex min-h-0">
           <div class="odt-mb-grid flex-1 min-h-0">
             <div class="odt-mb-sidebar">
@@ -1437,6 +1582,8 @@ for p in partners:
     initDebugPill();
     initShortcuts();
     initMenuBadge();
+    initAnalyticsTab();
+    initRecordTab();
 
     updatePageHint();
   }
@@ -1691,9 +1838,13 @@ for p in partners:
     shadow.getElementById("odt-tab-models").classList.toggle("hidden", tab !== "models");
     shadow.getElementById("odt-tab-inspect").classList.toggle("hidden", tab !== "inspect");
     shadow.getElementById("odt-tab-ctx").classList.toggle("hidden", tab !== "ctx");
+    shadow.getElementById("odt-tab-analytics").classList.toggle("hidden", tab !== "analytics");
+    shadow.getElementById("odt-tab-record").classList.toggle("hidden", tab !== "record");
     if (tab === "rpc") shadow.getElementById("odt-rpc-dot").classList.add("hidden");
     if (tab === "models" && !mbModelsLoaded) loadModelBrowser();
     if (tab === "ctx" && !ctxLoaded) loadCtx();
+    if (tab === "analytics") renderAnalytics();
+    if (tab === "record") updateRecordHint();
   }
 
   let mbModelsLoaded = false;
@@ -2447,6 +2598,7 @@ for p in partners:
     renderHint("odt-dt-page-hint", false);
     renderHint("odt-i18n-page-hint", false);
     renderHint("odt-mb-page-hint", false);
+    renderHint("odt-rec-page-hint", true);
     const vaHint = shadow.getElementById("odt-va-page-hint");
     if (vaHint) {
       if (problems.length) {
@@ -4127,6 +4279,435 @@ except NameError:
     menuBadgeHideTimer = setTimeout(() => {
       if (menuBadgeEl) menuBadgeEl.style.display = "none";
     }, 400);
+  }
+
+  let analyticsView = "errors";
+  function initAnalyticsTab() {
+    const seg = shadow.getElementById("odt-an-view-seg");
+    seg.querySelectorAll("button").forEach((b) => {
+      b.addEventListener("click", () => {
+        analyticsView = b.dataset.view;
+        seg
+          .querySelectorAll("button")
+          .forEach((x) => x.classList.toggle("active", x.dataset.view === analyticsView));
+        renderAnalytics();
+      });
+    });
+    shadow.getElementById("odt-an-refresh").addEventListener("click", renderAnalytics);
+    shadow.getElementById("odt-an-clear").addEventListener("click", () => {
+      clearRpc();
+      renderAnalytics();
+    });
+  }
+
+  function renderAnalytics() {
+    const body = shadow.getElementById("odt-an-body");
+    const countEl = shadow.getElementById("odt-an-count");
+    if (!body) return;
+    if (!rpcLog.length) {
+      countEl.textContent = "0";
+      body.innerHTML = `<div class="text-slate-500 text-center py-6">// no RPC data — interact with Odoo first</div>`;
+      return;
+    }
+    if (analyticsView === "errors") renderAnErrors(body, countEl);
+    else if (analyticsView === "slow") renderAnSlow(body, countEl);
+    else if (analyticsView === "nplus1") renderAnNplus1(body, countEl);
+  }
+
+  function renderAnErrors(body, countEl) {
+    const errs = rpcLog.filter((r) => r.status === "error");
+    countEl.textContent = `${errs.length} errors`;
+    if (!errs.length) {
+      body.innerHTML = `<div class="text-emerald-300 text-center py-6">// no RPC errors captured</div>`;
+      return;
+    }
+    body.innerHTML = errs
+      .slice()
+      .reverse()
+      .map((r) => {
+        const tb = extractTraceback(r);
+        const id = `errExp${r.id}`;
+        return `
+          <div class="odt-an-err">
+            <div class="head">
+              <span class="t">${escapeHtml(formatHms(r.t))}</span>
+              <span class="meth">${escapeHtml(r.method || "?")}</span>
+              <span class="model">${escapeHtml(r.model || "?")}</span>
+              <span class="dur">${Math.round(r.duration)}ms</span>
+              <span class="spacer"></span>
+              <button class="lnk" data-act="goto" data-id="${r.id}">▶ open in RPC</button>
+              <button class="lnk" data-act="copy" data-id="${r.id}">▶ copy</button>
+            </div>
+            <div class="msg">${escapeHtml(r.error || "(no message)")}</div>
+            ${tb ? `<details id="${id}"><summary>traceback</summary><pre>${escapeHtml(tb)}</pre></details>` : ""}
+          </div>`;
+      })
+      .join("");
+    body.querySelectorAll('[data-act="goto"]').forEach((b) => {
+      b.addEventListener("click", () => {
+        const id = parseInt(b.dataset.id, 10);
+        switchTab("rpc");
+        selectRpc(id);
+      });
+    });
+    body.querySelectorAll('[data-act="copy"]').forEach((b) => {
+      b.addEventListener("click", () => {
+        const r = rpcById.get(parseInt(b.dataset.id, 10));
+        if (!r) return;
+        const tb = extractTraceback(r) || "";
+        copyText(`${r.method} ${r.model}\n${r.error}\n\n${tb}`);
+      });
+    });
+  }
+
+  function extractTraceback(r) {
+    return (r && r.traceback) || null;
+  }
+
+  function renderAnSlow(body, countEl) {
+    const ok = rpcLog.filter((r) => r.status !== "pending");
+    const slow = ok.filter((r) => r.duration > 500);
+    const groups = new Map();
+    for (const r of ok) {
+      const k = `${r.model}|${r.method}`;
+      const g = groups.get(k) || { model: r.model, method: r.method, n: 0, total: 0, max: 0 };
+      g.n++;
+      g.total += r.duration;
+      if (r.duration > g.max) g.max = r.duration;
+      groups.set(k, g);
+    }
+    const top = Array.from(groups.values())
+      .map((g) => ({ ...g, avg: g.total / g.n }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 30);
+    countEl.textContent = `${slow.length} >500ms · ${top.length} groups`;
+    body.innerHTML =
+      `<div class="odt-an-table">
+        <div class="row head"><span>method · model</span><span>n</span><span>avg</span><span>max</span><span>total</span></div>` +
+      top
+        .map((g) => {
+          const cls = g.max > 1500 ? "veryslow" : g.max > 500 ? "slow" : "";
+          return `<div class="row ${cls}">
+            <span class="m">${escapeHtml(g.method || "?")} <span style="color:#64748b">·</span> ${escapeHtml(g.model || "?")}</span>
+            <span>${g.n}</span>
+            <span>${Math.round(g.avg)}ms</span>
+            <span>${Math.round(g.max)}ms</span>
+            <span>${Math.round(g.total)}ms</span>
+          </div>`;
+        })
+        .join("") +
+      `</div>
+       <div class="odt-an-sub">▌ individual calls > 500ms</div>` +
+      (slow.length
+        ? slow
+            .slice()
+            .sort((a, b) => b.duration - a.duration)
+            .slice(0, 50)
+            .map(
+              (r) => `<div class="odt-an-slow">
+              <span class="t">${escapeHtml(formatHms(r.t))}</span>
+              <span class="meth">${escapeHtml(r.method || "?")}</span>
+              <span class="model">${escapeHtml(r.model || "?")}</span>
+              <span class="dur ${r.duration > 1500 ? "veryslow" : "slow"}">${Math.round(r.duration)}ms</span>
+              <button class="lnk" data-id="${r.id}">▶</button>
+            </div>`
+            )
+            .join("")
+        : `<div class="text-slate-500 text-center py-4">// no calls > 500ms</div>`);
+    body.querySelectorAll(".odt-an-slow button").forEach((b) => {
+      b.addEventListener("click", () => {
+        const id = parseInt(b.dataset.id, 10);
+        switchTab("rpc");
+        selectRpc(id);
+      });
+    });
+  }
+
+  function argKey(args) {
+    try {
+      return JSON.stringify(args).slice(0, 200);
+    } catch (e) {
+      return "?";
+    }
+  }
+
+  function renderAnNplus1(body, countEl) {
+    const WINDOW_MS = 2000;
+    const THRESHOLD = 3;
+    const ok = rpcLog.filter((r) => r.status !== "pending").sort((a, b) => a.t - b.t);
+    const buckets = new Map();
+    for (const r of ok) {
+      const k = `${r.model}|${r.method}|${argKey(r.args)}`;
+      const arr = buckets.get(k) || [];
+      arr.push(r);
+      buckets.set(k, arr);
+    }
+    const hits = [];
+    for (const [k, arr] of buckets.entries()) {
+      if (arr.length < THRESHOLD) continue;
+      arr.sort((a, b) => a.t - b.t);
+      for (let i = 0; i + THRESHOLD - 1 < arr.length; i++) {
+        const span = arr[i + THRESHOLD - 1].t - arr[i].t;
+        if (span <= WINDOW_MS) {
+          const j = arr.findIndex((x, idx) => idx >= i && x.t - arr[i].t > WINDOW_MS);
+          const end = j === -1 ? arr.length : j;
+          const slice = arr.slice(i, end);
+          hits.push({
+            key: k,
+            model: slice[0].model,
+            method: slice[0].method,
+            count: slice.length,
+            firstT: slice[0].t,
+            lastT: slice[slice.length - 1].t,
+            ids: slice.map((x) => x.id),
+            argsPreview: argKey(slice[0].args)
+          });
+          i = end - 1;
+        }
+      }
+    }
+    countEl.textContent = `${hits.length} clusters`;
+    if (!hits.length) {
+      body.innerHTML = `<div class="text-emerald-300 text-center py-6">// no N+1 clusters detected (≥3 identical calls within 2s)</div>`;
+      return;
+    }
+    hits.sort((a, b) => b.count - a.count);
+    body.innerHTML = hits
+      .slice(0, 60)
+      .map(
+        (h) => `
+        <div class="odt-an-n1">
+          <div class="head">
+            <span class="meth">${escapeHtml(h.method || "?")}</span>
+            <span class="model">${escapeHtml(h.model || "?")}</span>
+            <span class="dur">${h.count}× in ${h.lastT - h.firstT}ms</span>
+            <span class="spacer"></span>
+            <button class="lnk" data-ids="${h.ids.join(",")}">▶ first</button>
+          </div>
+          <div class="msg" title="${escapeHtml(h.argsPreview)}">args: ${escapeHtml(truncate(h.argsPreview, 200))}</div>
+        </div>`
+      )
+      .join("");
+    body.querySelectorAll(".odt-an-n1 button").forEach((b) => {
+      b.addEventListener("click", () => {
+        const id = parseInt(b.dataset.ids.split(",")[0], 10);
+        switchTab("rpc");
+        selectRpc(id);
+      });
+    });
+  }
+
+  let recFieldsCache = null;
+  let recCurrent = null;
+  function initRecordTab() {
+    shadow.getElementById("odt-rec-load").addEventListener("click", loadFullRecord);
+    shadow.getElementById("odt-rec-id").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loadFullRecord();
+    });
+    shadow.getElementById("odt-rec-model").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loadFullRecord();
+    });
+    shadow.getElementById("odt-rec-page-use").addEventListener("click", () => {
+      const ctx = getActiveCtx();
+      if (ctx.model) shadow.getElementById("odt-rec-model").value = ctx.model;
+      if (ctx.resId) shadow.getElementById("odt-rec-id").value = String(ctx.resId);
+    });
+    shadow.getElementById("odt-rec-copy").addEventListener("click", () => {
+      if (recCurrent) copyText(JSON.stringify(recCurrent.values, null, 2));
+    });
+    shadow.getElementById("odt-oc-run").addEventListener("click", runOnchange);
+    const combo = createCombo(shadow.getElementById("odt-oc-field-combo"), {
+      placeholder: "pick field…",
+      searchPlaceholder: "filter fields…"
+    });
+    shadow.getElementById("odt-oc-field-combo").__combo = combo;
+  }
+
+  function updateRecordHint() {
+    updatePageHint();
+  }
+
+  async function loadFullRecord() {
+    const model = shadow.getElementById("odt-rec-model").value.trim();
+    const idRaw = shadow.getElementById("odt-rec-id").value.trim();
+    const id = parseInt(idRaw, 10);
+    const out = shadow.getElementById("odt-rec-out");
+    const copyBtn = shadow.getElementById("odt-rec-copy");
+    const ocOut = shadow.getElementById("odt-oc-out");
+    const ocRun = shadow.getElementById("odt-oc-run");
+    if (!model || Number.isNaN(id)) {
+      out.className = "odt-output err";
+      out.textContent = "// need model + numeric id";
+      return;
+    }
+    out.className = "odt-output muted";
+    out.textContent = "// loading fields_get + read…";
+    try {
+      const fields = await callKw(model, "fields_get", [], {
+        attributes: ["string", "type", "readonly", "store", "compute", "relation"]
+      });
+      const allNames = Object.keys(fields);
+      const rows = await callKw(model, "read", [[id], allNames]);
+      if (!rows || !rows[0]) {
+        out.className = "odt-output err";
+        out.textContent = `// no record ${model}#${id}`;
+        return;
+      }
+      recCurrent = { model, id, fields, values: rows[0] };
+      recFieldsCache = fields;
+      out.className = "odt-output";
+      out.innerHTML = renderRecordJson(rows[0], fields);
+      copyBtn.disabled = false;
+      const writable = Object.entries(fields)
+        .filter(([, f]) => !f.readonly && !f.compute)
+        .map(([n, f]) => ({
+          value: n,
+          label: `${n} · ${f.type}${f.string ? " · " + f.string : ""}`
+        }))
+        .sort((a, b) => a.value.localeCompare(b.value));
+      const combo = shadow.getElementById("odt-oc-field-combo").__combo;
+      if (combo) combo.setOptions(writable);
+      ocRun.disabled = !writable.length;
+      ocOut.className = "odt-output muted";
+      ocOut.textContent = "// pick field + value, then Run";
+    } catch (e) {
+      out.className = "odt-output err";
+      out.textContent = `// error: ${e.message}`;
+      copyBtn.disabled = true;
+    }
+  }
+
+  function renderRecordJson(vals, fields) {
+    const keys = Object.keys(vals).sort();
+    return keys
+      .map((k) => {
+        const f = fields[k] || {};
+        const t = f.type || "?";
+        const v = vals[k];
+        const vStr = v === false ? "false" : v === null ? "null" : JSON.stringify(v);
+        const rel = f.relation
+          ? ` <span style="color:#a5b4fc">→ ${escapeHtml(f.relation)}</span>`
+          : "";
+        const flag = f.compute
+          ? ` <span style="color:#c4b5fd;font-size:9px">[comp]</span>`
+          : f.readonly
+            ? ` <span style="color:#64748b;font-size:9px">[ro]</span>`
+            : "";
+        return `<div style="display:flex;gap:8px;padding:2px 0;border-bottom:1px dashed rgba(100,116,139,0.15)">
+          <span style="color:#94a3b8;min-width:140px">${escapeHtml(k)}</span>
+          <span style="color:#64748b;font-size:10px;min-width:80px">${escapeHtml(t)}${rel}${flag}</span>
+          <span style="color:#e2e8f0;flex:1;word-break:break-all">${escapeHtml(truncate(vStr, 400))}</span>
+        </div>`;
+      })
+      .join("");
+  }
+
+  async function runOnchange() {
+    if (!recCurrent) return;
+    const combo = shadow.getElementById("odt-oc-field-combo").__combo;
+    const field = combo && combo.getValue();
+    const rawVal = shadow.getElementById("odt-oc-value").value;
+    const out = shadow.getElementById("odt-oc-out");
+    if (!field) {
+      out.className = "odt-output err";
+      out.textContent = "// pick a field";
+      return;
+    }
+    const fdef = recCurrent.fields[field] || {};
+    let parsed;
+    try {
+      parsed = parseOnchangeValue(rawVal, fdef.type);
+    } catch (e) {
+      out.className = "odt-output err";
+      out.textContent = `// value parse error: ${e.message}`;
+      return;
+    }
+    const before = JSON.parse(JSON.stringify(recCurrent.values));
+    const next = { ...before, [field]: parsed };
+    const allFieldsSpec = {};
+    for (const k of Object.keys(recCurrent.fields)) allFieldsSpec[k] = {};
+    out.className = "odt-output muted";
+    out.textContent = "// calling onchange…";
+    try {
+      const result = await callKw(recCurrent.model, "onchange", [
+        [recCurrent.id],
+        next,
+        [field],
+        allFieldsSpec
+      ]);
+      const updates = (result && result.value) || {};
+      const warning = result && result.warning;
+      const domain = result && result.domain;
+      const keys = Object.keys(updates);
+      out.className = "odt-output";
+      out.innerHTML =
+        (warning
+          ? `<div style="color:#fda4af;padding:4px 0">⚠ ${escapeHtml(warning.title || "")}: ${escapeHtml(warning.message || "")}</div>`
+          : "") +
+        (keys.length
+          ? `<div style="color:#f59e0b;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:4px">▌ updates (${keys.length})</div>` +
+            keys
+              .map((k) => {
+                const oldV = JSON.stringify(before[k]);
+                const newV = JSON.stringify(updates[k]);
+                const same = oldV === newV;
+                return `<div style="display:flex;gap:8px;padding:2px 0;border-bottom:1px dashed rgba(100,116,139,0.15)">
+                  <span style="color:#94a3b8;min-width:140px">${escapeHtml(k)}</span>
+                  <span style="color:#fda4af;flex:1;text-decoration:${same ? "none" : "line-through"};word-break:break-all">${escapeHtml(truncate(oldV, 200))}</span>
+                  <span style="color:${same ? "#64748b" : "#6ee7b7"};flex:1;word-break:break-all">${escapeHtml(truncate(newV, 200))}</span>
+                </div>`;
+              })
+              .join("")
+          : `<div style="color:#64748b">// no field updates returned</div>`) +
+        (domain
+          ? `<div style="margin-top:6px;color:#a5b4fc;font-size:11px">domain: ${escapeHtml(JSON.stringify(domain))}</div>`
+          : "");
+    } catch (e) {
+      out.className = "odt-output err";
+      out.textContent = `// onchange failed: ${e.message}`;
+    }
+  }
+
+  function parseOnchangeValue(raw, type) {
+    if (raw === "") {
+      if (type === "boolean") return false;
+      return false;
+    }
+    if (type === "boolean") {
+      const v = raw.toLowerCase();
+      if (v === "true" || v === "1") return true;
+      if (v === "false" || v === "0") return false;
+      throw new Error("expected true/false");
+    }
+    if (type === "integer" || type === "many2one") {
+      const n = parseInt(raw, 10);
+      if (Number.isNaN(n)) throw new Error("expected integer id");
+      return n;
+    }
+    if (type === "float" || type === "monetary") {
+      const n = parseFloat(raw);
+      if (Number.isNaN(n)) throw new Error("expected number");
+      return n;
+    }
+    if (type === "one2many" || type === "many2many") {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        throw new Error("expected JSON array (e.g. [[6,0,[1,2]]])");
+      }
+    }
+    if (
+      raw.startsWith("[") ||
+      raw.startsWith("{") ||
+      raw === "null" ||
+      raw === "true" ||
+      raw === "false"
+    ) {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {}
+    }
+    return raw;
   }
 
   build();
