@@ -15,6 +15,12 @@
       "js": ["ui.js"],
       "run_at": "document_idle",
       "world": "ISOLATED"
+    },
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["gh-actions.js"],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
     }
   ],
   "web_accessible_resources": [
