@@ -45,9 +45,9 @@ design constraint and the reason for everything else:
 - **`interceptor.js`** — `world: "MAIN"`, injected at `document_start`. Runs in the page's own
   world so it can monkey-patch `window.fetch` / `XMLHttpRequest`. It watches `call_kw` RPCs,
   and for `get_views` responses it replays Odoo's `processArch` traversal over the returned arch
-  - `models` map to find any field reference that does not exist in `models[model]`. It cannot
-    touch the extension APIs or the panel DOM, so it ships findings out via a `CustomEvent`
-    (`__odoo_dev_toolkit__`) on `window`, with a deduped `problems` array in `detail`.
+  plus the `models` map to find any field reference that does not exist in `models[model]`. It
+  cannot touch the extension APIs or the panel DOM, so it ships findings out via a `CustomEvent`
+  (`__odoo_dev_toolkit__`) on `window`, with a deduped `problems` array in `detail`.
 
 - **`ui.js`** — `world: "ISOLATED"`, injected at `document_idle`. Owns the UI and anything
   needing `chrome.*` APIs. It listens for the `__odoo_dev_toolkit__` event, dedupes again, and
