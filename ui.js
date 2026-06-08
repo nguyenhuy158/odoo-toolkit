@@ -50,6 +50,22 @@
     return data.result;
   }
 
+  let SESSION_INFO_CACHE = null;
+  async function fetchSessionInfo() {
+    if (SESSION_INFO_CACHE) return SESSION_INFO_CACHE;
+    const res = await fetch("/web/session/get_session_info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ jsonrpc: "2.0", method: "call", params: {} })
+    });
+    const data = await res.json();
+    if (data.error)
+      throw new Error((data.error.data && data.error.data.message) || "session error");
+    SESSION_INFO_CACHE = data.result || null;
+    return SESSION_INFO_CACHE;
+  }
+
   function build() {
     const host = document.createElement("div");
     host.id = "__odoo_dev_toolkit_host__";
@@ -811,6 +827,75 @@
         background: rgba(15,23,42,0.5);
         border-top: 1px dashed rgba(148,163,184,0.18);
       }
+      .odt-dbg-seg {
+        display: inline-flex; gap: 0; align-items: stretch;
+        border-radius: 4px; overflow: hidden;
+        border: 1px solid rgba(100,116,139,0.4);
+      }
+      .odt-dbg-seg button {
+        all: unset; cursor: pointer;
+        font: 700 10px/1 "JetBrains Mono",ui-monospace,monospace;
+        padding: 4px 7px; color: #94a3b8;
+        background: rgba(15,23,42,0.6);
+        text-align: center; min-width: 16px;
+      }
+      .odt-dbg-seg button + button { border-left: 1px solid rgba(100,116,139,0.3); }
+      .odt-dbg-seg button:hover { background: rgba(30,41,59,0.9); color: #e2e8f0; }
+      .odt-dbg-seg button.active { color: #0f172a; background: #fbbf24; }
+      .odt-dbg-seg button.active[data-dbg="1"] { background: #34d399; }
+      .odt-dbg-seg button.active[data-dbg=""] { background: #64748b; color: #f1f5f9; }
+      .odt-pal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(2,6,23,0.55);
+        z-index: 2147483647; display: flex; align-items: flex-start; justify-content: center;
+        padding-top: 14vh;
+      }
+      .odt-pal-box {
+        width: 480px; max-width: 92vw;
+        background: #0f172a; color: #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(52,211,153,0.4);
+        overflow: hidden;
+        font: 13px/1.4 "JetBrains Mono",ui-monospace,monospace;
+      }
+      .odt-pal-input {
+        all: unset; display: block; width: 100%;
+        box-sizing: border-box;
+        padding: 14px 16px;
+        font: 14px/1 "JetBrains Mono",ui-monospace,monospace;
+        color: #f1f5f9;
+        border-bottom: 1px solid rgba(100,116,139,0.3);
+      }
+      .odt-pal-input::placeholder { color: #475569; }
+      .odt-pal-list { max-height: 50vh; overflow-y: auto; padding: 6px 0; }
+      .odt-pal-item {
+        padding: 8px 16px; cursor: pointer;
+        display: flex; gap: 10px; align-items: center;
+        color: #cbd5e1;
+      }
+      .odt-pal-item.active { background: rgba(52,211,153,0.18); color: #fff; }
+      .odt-pal-item .kbd {
+        font-size: 10px; color: #64748b; margin-left: auto;
+        padding: 1px 5px; border: 1px solid rgba(100,116,139,0.4); border-radius: 3px;
+      }
+      .odt-menu-badge {
+        position: fixed; z-index: 2147483646;
+        display: flex; gap: 6px; align-items: center;
+        padding: 6px 10px;
+        background: #0f172a; color: #e2e8f0;
+        border-radius: 6px;
+        font: 11px/1.2 "JetBrains Mono",ui-monospace,monospace;
+        box-shadow: 0 12px 28px -10px rgba(0,0,0,0.7), 0 0 0 1px rgba(52,211,153,0.45);
+        pointer-events: auto; user-select: text;
+      }
+      .odt-menu-badge .lbl { color: #64748b; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; }
+      .odt-menu-badge .xid { color: #6ee7b7; }
+      .odt-menu-badge button {
+        all: unset; cursor: pointer; color: #94a3b8;
+        padding: 2px 6px; border-radius: 3px;
+        font-size: 10px;
+      }
+      .odt-menu-badge button:hover { color: #fbbf24; background: rgba(251,191,36,0.1); }
     `;
     shadow.appendChild(style);
 
@@ -837,6 +922,11 @@
             <span class="text-[11px] text-slate-400">developer utilities</span>
           </div>
           <div class="flex items-center gap-1">
+            <div id="odt-dbg-seg" class="odt-dbg-seg odt-mono" title="debug mode (Cmd/Ctrl+Shift+,)">
+              <button data-dbg="" title="debug off">∅</button>
+              <button data-dbg="1" title="?debug=1">1</button>
+              <button data-dbg="assets" title="?debug=assets">A</button>
+            </div>
             <button id="odt-max" title="maximize"
               class="rounded-md px-2 py-1 text-[11px] font-medium bg-slate-700 text-slate-200 hover:bg-slate-600 cursor-pointer">▢</button>
             <button id="odt-min" title="minimize"
@@ -1343,6 +1433,10 @@ for p in partners:
     shadow.getElementById("odt-pk-toggle").addEventListener("click", togglePicker);
     shadow.getElementById("odt-ctx-refresh").addEventListener("click", loadCtx);
     initCtxActionCombo();
+
+    initDebugPill();
+    initShortcuts();
+    initMenuBadge();
 
     updatePageHint();
   }
@@ -3048,6 +3142,7 @@ except NameError:
         <span class="spacer"></span>
         <button class="lnk" data-act="copy-args">copy args</button>
         <button class="lnk" data-act="copy-curl">copy curl</button>
+        <button class="lnk" data-act="copy-py">copy py</button>
       </div>
       ${r.error ? `<div class="odt-err" style="margin-bottom:8px">// ${escapeHtml(r.error)}</div>` : ""}
       <div class="sec-label">args</div>
@@ -3060,6 +3155,9 @@ except NameError:
     el.querySelector('[data-act="copy-curl"]').addEventListener("click", () =>
       copyText(buildCurl(r))
     );
+    el.querySelector('[data-act="copy-py"]').addEventListener("click", () =>
+      copyText(buildPython(r))
+    );
   }
 
   function buildCurl(r) {
@@ -3070,6 +3168,33 @@ except NameError:
     });
     const url = location.origin + (r.url.startsWith("/") ? r.url : "/" + r.url);
     return `curl '${url}' \\\n  -H 'Content-Type: application/json' \\\n  --cookie 'session_id=<YOUR_SESSION_ID>' \\\n  --data-raw '${body.replace(/'/g, "'\\''")}'`;
+  }
+
+  function pyRepr(v) {
+    if (v === null || v === undefined) return "None";
+    if (v === true) return "True";
+    if (v === false) return "False";
+    if (typeof v === "number") return Number.isFinite(v) ? String(v) : "None";
+    if (typeof v === "string") {
+      return "'" + v.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'";
+    }
+    if (Array.isArray(v)) return "[" + v.map(pyRepr).join(", ") + "]";
+    if (typeof v === "object") {
+      const parts = Object.entries(v).map(([k, val]) => `${pyRepr(k)}: ${pyRepr(val)}`);
+      return "{" + parts.join(", ") + "}";
+    }
+    return "None";
+  }
+
+  function buildPython(r) {
+    const model = r.model || "model.name";
+    const method = r.method || "method";
+    const args = Array.isArray(r.args) ? r.args : [];
+    const kwargs = r.kwargs && typeof r.kwargs === "object" ? r.kwargs : {};
+    const argList = args.map(pyRepr);
+    const kwList = Object.entries(kwargs).map(([k, v]) => `${k}=${pyRepr(v)}`);
+    const allArgs = argList.concat(kwList).join(", ");
+    return `env['${model}'].${method}(${allArgs})`;
   }
 
   function copyText(text) {
@@ -3512,9 +3637,21 @@ except NameError:
               ["id", "name", "category_id", "full_name"]
             ])
           : [];
+      const session = await fetchSessionInfo().catch(() => null);
+      const moduleCount = await callKw("ir.module.module", "search_count", [
+        [["state", "=", "installed"]]
+      ]).catch(() => null);
+      const dbName = (session && session.db) || "?";
+      const verInfo =
+        (session &&
+          (session.server_version || (session.version_info && session.version_info.join(".")))) ||
+        "?";
 
       grid.style.display = "flex";
       grid.innerHTML = `
+        <div class="cell"><span class="k">db</span><span class="v" style="font-size:11px;color:#fbbf24">${escapeHtml(dbName)}</span></div>
+        <div class="cell"><span class="k">version</span><span class="v" style="font-size:11px">${escapeHtml(String(verInfo))}</span></div>
+        <div class="cell"><span class="k">modules</span><span class="v">${moduleCount === null ? "?" : moduleCount}</span></div>
         <div class="cell"><span class="k">uid</span><span class="v">${u.id}</span></div>
         <div class="cell"><span class="k">login</span><span class="v" style="font-size:11px">${escapeHtml(u.login)}</span></div>
         <div class="cell"><span class="k">name</span><span class="v" style="font-size:11px">${escapeHtml(u.name)}</span></div>
@@ -3676,6 +3813,320 @@ except NameError:
         <span class="rel">${rel}</span>
         <span class="flags">${flags.join(" ")}</span>
       </div>`;
+  }
+
+  function dbgStorageKey() {
+    return `odt:debug:${location.host}`;
+  }
+
+  function currentDebug() {
+    const v = new URL(location.href).searchParams.get("debug");
+    if (v === null) return "";
+    if (v === "" || v === "1" || v === "assets") return v;
+    return "1";
+  }
+
+  function setDebugMode(val) {
+    try {
+      localStorage.setItem(dbgStorageKey(), val);
+    } catch (e) {}
+    setDebug(val);
+  }
+
+  function paintDebugPill() {
+    const cur = currentDebug();
+    shadow.querySelectorAll("#odt-dbg-seg button").forEach((b) => {
+      b.classList.toggle("active", b.dataset.dbg === cur);
+    });
+  }
+
+  function initDebugPill() {
+    const seg = shadow.getElementById("odt-dbg-seg");
+    if (!seg) return;
+    paintDebugPill();
+    seg.querySelectorAll("button").forEach((b) => {
+      b.addEventListener("click", () => setDebugMode(b.dataset.dbg));
+    });
+    try {
+      const stored = localStorage.getItem(dbgStorageKey());
+      const cur = currentDebug();
+      if (stored && stored !== cur && !sessionStorage.getItem("odt:debug:autoSkip")) {
+        sessionStorage.setItem("odt:debug:autoSkip", "1");
+        if (stored === "" && cur !== "") return;
+        if (stored !== "" && cur === "") setDebug(stored);
+      }
+    } catch (e) {}
+  }
+
+  const TAB_LABELS = {
+    detector: "Field Detector",
+    noupdate: "noupdate",
+    viewarch: "View Arch",
+    domain: "Domain Tester",
+    ormeval: "ORM Eval",
+    i18n: "i18n Gaps",
+    rpc: "RPC Inspector",
+    models: "Model Browser",
+    inspect: "On-page Inspector",
+    ctx: "Context"
+  };
+
+  function initShortcuts() {
+    document.addEventListener("keydown", onShortcut, true);
+    shadow.addEventListener("keydown", onShortcut, true);
+  }
+
+  function onShortcut(e) {
+    const mod = e.metaKey || e.ctrlKey;
+    if (!mod) return;
+    if (e.shiftKey && (e.key === "D" || e.key === "d")) {
+      e.preventDefault();
+      togglePanelKeyboard();
+    } else if (e.shiftKey && e.key === "<") {
+      e.preventDefault();
+      cycleDebug();
+    } else if (!e.shiftKey && !e.altKey && (e.key === "k" || e.key === "K")) {
+      e.preventDefault();
+      openPalette();
+    }
+  }
+
+  function togglePanelKeyboard() {
+    const hidden = panel.classList.contains("hidden");
+    toggle(hidden);
+  }
+
+  function cycleDebug() {
+    const order = ["", "1", "assets"];
+    const cur = currentDebug();
+    const idx = order.indexOf(cur);
+    setDebugMode(order[(idx + 1) % order.length]);
+  }
+
+  let palOverlay = null;
+  function openPalette() {
+    if (palOverlay) return;
+    palOverlay = document.createElement("div");
+    palOverlay.className = "odt-pal-overlay";
+    palOverlay.innerHTML = `
+      <div class="odt-pal-box" role="dialog">
+        <input class="odt-pal-input" type="text" placeholder="Jump to tab…" />
+        <div class="odt-pal-list"></div>
+      </div>`;
+    shadow.appendChild(palOverlay);
+    const input = palOverlay.querySelector(".odt-pal-input");
+    const list = palOverlay.querySelector(".odt-pal-list");
+    let items = [];
+    let active = 0;
+    const allItems = Object.entries(TAB_LABELS).map(([k, label]) => ({ key: k, label }));
+
+    function render() {
+      const q = input.value.trim().toLowerCase();
+      items = q
+        ? allItems.filter((i) => i.label.toLowerCase().includes(q) || i.key.includes(q))
+        : allItems;
+      if (active >= items.length) active = 0;
+      list.innerHTML = items
+        .map(
+          (it, i) =>
+            `<div class="odt-pal-item ${i === active ? "active" : ""}" data-key="${escapeHtml(it.key)}">
+              <span>${escapeHtml(it.label)}</span>
+              <span class="kbd">${escapeHtml(it.key)}</span>
+            </div>`
+        )
+        .join("");
+      list.querySelectorAll(".odt-pal-item").forEach((el, i) => {
+        el.addEventListener("mousemove", () => {
+          if (active !== i) {
+            active = i;
+            paint();
+          }
+        });
+        el.addEventListener("click", () => pick(items[i]));
+      });
+    }
+    function paint() {
+      list.querySelectorAll(".odt-pal-item").forEach((el, i) => {
+        el.classList.toggle("active", i === active);
+      });
+    }
+    function pick(it) {
+      if (!it) return;
+      toggle(true);
+      switchTab(it.key);
+      closePalette();
+    }
+    input.addEventListener("input", render);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closePalette();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        active = Math.min(items.length - 1, active + 1);
+        paint();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        active = Math.max(0, active - 1);
+        paint();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        pick(items[active]);
+      }
+    });
+    palOverlay.addEventListener("click", (e) => {
+      if (e.target === palOverlay) closePalette();
+    });
+    render();
+    input.focus();
+  }
+
+  function closePalette() {
+    if (palOverlay) {
+      palOverlay.remove();
+      palOverlay = null;
+    }
+  }
+
+  const MENU_XMLID_CACHE = new Map();
+  const ACT_XMLID_CACHE = new Map();
+  let menuBadgeEl = null;
+  let menuBadgeHideTimer = null;
+
+  function initMenuBadge() {
+    document.addEventListener(
+      "mouseover",
+      (e) => {
+        const t = e.target;
+        if (!t || t.nodeType !== 1) return;
+        if (menuBadgeEl && menuBadgeEl.contains(t)) return;
+        const info = resolveMenuTarget(t);
+        if (info) showMenuBadge(info, t);
+      },
+      true
+    );
+    document.addEventListener(
+      "mouseout",
+      (e) => {
+        if (menuBadgeEl && e.relatedTarget && menuBadgeEl.contains(e.relatedTarget)) return;
+        scheduleHideBadge();
+      },
+      true
+    );
+  }
+
+  function resolveMenuTarget(node) {
+    const menuEl = node.closest && node.closest("[data-menu-xmlid]");
+    if (menuEl) return { kind: "menu", xmlid: menuEl.getAttribute("data-menu-xmlid") };
+    const menuById = node.closest && node.closest("[data-menu-id]");
+    if (menuById)
+      return { kind: "menu-id", id: parseInt(menuById.getAttribute("data-menu-id"), 10) };
+    const navById = node.closest && node.closest("[data-section-id]");
+    if (navById)
+      return { kind: "menu-id", id: parseInt(navById.getAttribute("data-section-id"), 10) };
+    const actEl = node.closest && node.closest("[data-action-id]");
+    if (actEl) {
+      const id = parseInt(actEl.getAttribute("data-action-id"), 10);
+      if (!Number.isNaN(id)) return { kind: "action-id", id };
+    }
+    return null;
+  }
+
+  async function resolveXmlId(info) {
+    if (info.kind === "menu" && info.xmlid) return info.xmlid;
+    if (info.kind === "menu-id") {
+      if (MENU_XMLID_CACHE.has(info.id)) return MENU_XMLID_CACHE.get(info.id);
+      const rows = await callKw(
+        "ir.model.data",
+        "search_read",
+        [
+          [
+            ["model", "=", "ir.ui.menu"],
+            ["res_id", "=", info.id]
+          ],
+          ["module", "name"]
+        ],
+        { limit: 1 }
+      ).catch(() => []);
+      const xid = rows && rows[0] ? `${rows[0].module}.${rows[0].name}` : null;
+      MENU_XMLID_CACHE.set(info.id, xid);
+      return xid;
+    }
+    if (info.kind === "action-id") {
+      if (ACT_XMLID_CACHE.has(info.id)) return ACT_XMLID_CACHE.get(info.id);
+      const rows = await callKw(
+        "ir.model.data",
+        "search_read",
+        [
+          [
+            [
+              "model",
+              "in",
+              [
+                "ir.actions.act_window",
+                "ir.actions.server",
+                "ir.actions.client",
+                "ir.actions.report"
+              ]
+            ],
+            ["res_id", "=", info.id]
+          ],
+          ["module", "name"]
+        ],
+        { limit: 1 }
+      ).catch(() => []);
+      const xid = rows && rows[0] ? `${rows[0].module}.${rows[0].name}` : null;
+      ACT_XMLID_CACHE.set(info.id, xid);
+      return xid;
+    }
+    return null;
+  }
+
+  async function showMenuBadge(info, anchor) {
+    if (menuBadgeHideTimer) {
+      clearTimeout(menuBadgeHideTimer);
+      menuBadgeHideTimer = null;
+    }
+    let xid;
+    try {
+      xid = await resolveXmlId(info);
+    } catch (e) {
+      return;
+    }
+    if (!xid) return;
+    if (!menuBadgeEl) {
+      menuBadgeEl = document.createElement("div");
+      menuBadgeEl.className = "odt-menu-badge";
+      const inner = document.createElement("div");
+      inner.style.cssText = "display:flex;gap:6px;align-items:center";
+      menuBadgeEl.appendChild(inner);
+      document.documentElement.appendChild(menuBadgeEl);
+      menuBadgeEl.addEventListener("mouseenter", () => {
+        if (menuBadgeHideTimer) {
+          clearTimeout(menuBadgeHideTimer);
+          menuBadgeHideTimer = null;
+        }
+      });
+      menuBadgeEl.addEventListener("mouseleave", scheduleHideBadge);
+    }
+    const label = info.kind === "action-id" ? "ACTION" : "MENU";
+    menuBadgeEl.firstChild.innerHTML = `
+      <span class="lbl">${label}</span>
+      <span class="xid"></span>
+      <button data-act="copy">copy</button>`;
+    menuBadgeEl.querySelector(".xid").textContent = xid;
+    menuBadgeEl.querySelector('[data-act="copy"]').onclick = () => copyText(xid);
+    const r = anchor.getBoundingClientRect();
+    menuBadgeEl.style.top = `${Math.max(8, r.bottom + 4)}px`;
+    menuBadgeEl.style.left = `${Math.max(8, Math.min(window.innerWidth - 320, r.left))}px`;
+    menuBadgeEl.style.display = "flex";
+  }
+
+  function scheduleHideBadge() {
+    if (menuBadgeHideTimer) clearTimeout(menuBadgeHideTimer);
+    menuBadgeHideTimer = setTimeout(() => {
+      if (menuBadgeEl) menuBadgeEl.style.display = "none";
+    }, 400);
   }
 
   build();
